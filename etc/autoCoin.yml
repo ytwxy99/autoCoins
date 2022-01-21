@@ -1,0 +1,13 @@
+CoinCsv: "./coin_names.csv"
+LogPath: "autoCoins.log"
+DBPath: "autoCoin.db"
+
+options:
+  quantity: 15  # 总金额
+  pairing: USDT
+  test: True
+  sl: -5
+  tp: 3
+  enable_tsl: True
+  tsl: -3
+  ttp: 3
