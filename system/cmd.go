@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
 	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/gateway"
@@ -65,6 +66,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 		Args:  cobra.MinimumNArgs(1),
 	}
 
+	// use macd policy
 	var macdCmd = &cobra.Command{
 		Use:   "macd [string to echo]",
 		Short: "Using macd to do a trade",
@@ -80,10 +82,24 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 		},
 	}
 
+	// use cointegration policy
+	var cointegrationCmd = &cobra.Command{
+		Use:   "cointegration [string to echo]",
+		Short: "Using cointegration to do a trade",
+		Run: func(cmd *cobra.Command, args []string) {
+			logrus.Info("Find the cointegration in the sea ！ get it !")
+			t := &trade.Trade{
+				Policy: "cointegration",
+			}
+			t.Entry(client, db, sysConf)
+		},
+	}
+
 	var rootCmd = &cobra.Command{Use: "autoCoin"}
 	rootCmd.AddCommand(InitCmd)
 	rootCmd.AddCommand(GateWayCmd)
 	rootCmd.AddCommand(tradeCmd)
 	tradeCmd.AddCommand(macdCmd)
+	tradeCmd.AddCommand(cointegrationCmd)
 	rootCmd.Execute()
 }

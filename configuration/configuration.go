@@ -29,6 +29,7 @@ var (
 // system configuration
 type SystemConf struct {
 	CoinCsv string `yaml:"CoinCsv"`
+	CointegrationSrcipt string `yaml:"CointegrationSrcipt"`
 	LogPath string `yaml:"LogPath"`
 	DBPath  string `yaml:"DBPath"`
 	Options struct {

@@ -1,10 +1,12 @@
 package trade
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
+
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/policy"
 )
@@ -40,5 +42,8 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 		}
 		// waitgroup.Done()
 	}
+}
 
+func DoCointegration(db *gorm.DB, scriptPath string) {
+	fmt.Println(scriptPath)
 }

@@ -1,4 +1,5 @@
 CoinCsv: "./coin_names.csv"
+CointegrationSrcipt: "./scripts/cointegration.py"
 LogPath: "autoCoins.log"
 DBPath: "autoCoin.db"
 

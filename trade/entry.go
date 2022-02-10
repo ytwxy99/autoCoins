@@ -7,10 +7,11 @@ import (
 
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/utils"
-	"gorm.io/gorm"
 )
 
 type Trade struct {
@@ -58,5 +59,8 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 				}
 			}
 		}
+
+	} else if t.Policy == "cointegration" {
+		DoCointegration(db, sysConf.CointegrationSrcipt)
 	}
 }
