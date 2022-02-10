@@ -2,6 +2,7 @@ package database
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Order struct {
@@ -65,4 +66,14 @@ type InOrder struct {
 
 func (inorder InOrder) TableName() string {
 	return "inorder"
+}
+
+type HistoryDay struct {
+	Contract string    `json:"contract"  gorm:"primary_key"`
+	Time     time.Time `json:"time"  gorm:"primary_key"`
+	Price    string
+}
+
+func (HistoryDay HistoryDay) TableName() string {
+	return "history_day"
 }

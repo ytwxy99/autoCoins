@@ -13,7 +13,7 @@ func GetMacd(values [][]string, short int, long int, M int) []map[string]string 
 		m := make(map[string]string)
 		m["t"] = value[0] // time
 		m["v"] = value[1] // time
-		m["c"] = value[2] // open price
+		m["c"] = value[2] // close price
 		m["h"] = value[3] // high price
 		m["l"] = value[4] // low price
 		m["o"] = value[5] // open price

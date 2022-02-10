@@ -2,6 +2,9 @@ package system
 
 import (
 	"context"
+	"gorm.io/gorm"
+	"time"
+
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -10,8 +13,6 @@ import (
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/gateway"
 	"github.com/ytwxy99/autoCoins/trade"
-	"gorm.io/gorm"
-	"time"
 )
 
 // refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
@@ -29,7 +30,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 					if err != nil {
 						logrus.Error("get sport all coins error: %s\n", err)
 					}
-					err = InitCurrencyPairs(client, result, sysConf.CoinCsv)
+					err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
 					if err != nil {
 						initErr <- err
 					}
@@ -38,7 +39,6 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 					// update coins list over specified interval time.
 					time.Sleep(3600 * time.Second)
 				}
-
 			}()
 
 			select {
