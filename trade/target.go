@@ -1,7 +1,6 @@
 package trade
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 
 	"github.com/gateio/gateapi-go/v6"
@@ -11,11 +10,14 @@ import (
 	"github.com/ytwxy99/autoCoins/policy"
 )
 
+var target policy.Policy
+
 // find macd buy point target
 func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyCoins chan<- string) {
+	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {
-			macdCondition := policy.MacdTarget(client, coin, buyCoins)
+			macdCondition := target.Target(client, coin).(bool)
 			if macdCondition {
 				//NOTE(ytwxy99), do real trade.
 				inOrder := database.InOrder{
@@ -44,6 +46,8 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 	}
 }
 
+// find buy point target by doing cointegration
 func DoCointegration(db *gorm.DB, scriptPath string) {
-	fmt.Println(scriptPath)
+	target = &policy.Cointegration{}
+	target.Target()
 }

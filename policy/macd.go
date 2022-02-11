@@ -6,6 +6,8 @@ import (
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
+type MacdPolicy struct{}
+
 // get macd data
 func GetMacd(values [][]string, short int, long int, M int) []map[string]string {
 	var ks []map[string]string
@@ -70,7 +72,11 @@ func calcEma(values []map[string]string, num int) []float32 {
 }
 
 // find macd buy point
-func MacdTarget(client *gateapi.APIClient, coin string, buyCoins chan<- string) bool {
+func (*MacdPolicy) Target(args ...interface{}) interface{} {
+	// convert specified type
+	client := args[0].(*gateapi.APIClient)
+	coin := args[1].(string)
+
 	k4hValues := interfaces.K(client, coin, -100, "4h")
 	k15mValues := interfaces.K(client, coin, -1, "15m")
 	if k4hValues != nil && k15mValues != nil {
