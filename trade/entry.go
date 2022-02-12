@@ -61,6 +61,6 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 		}
 
 	} else if t.Policy == "cointegration" {
-		DoCointegration(db, sysConf.CointegrationSrcipt)
+		DoCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CoinCsv)
 	}
 }
