@@ -30,7 +30,5 @@ def getAll(tableName, coin,  dbConn):
     c = dbConn.cursor()
 
     cursor = c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
-    for row in cursor:
-        print(row[0], row[1], row[2])
 
     return cursor
