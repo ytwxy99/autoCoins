@@ -1,34 +1,38 @@
 # -*- coding:utf8 -*-
 import sqlite3
 
-def getDb(dbPath):
-    """get sqlite3 connection object
 
-    :param dbPath: sqlite3 database file
-    :return: database connection object
-    """
-    return sqlite3.connect(dbPath)
+class Database(object):
+    def __init__(self, dbPath):
+        self.dbPath = dbPath
+        self.conn = None
 
+    def initDb(self):
+        """get sqlite3 connection object
 
-def closeDB(dbConn):
-    """close sqlite3 connection
-
-    :param dbConn:
-    :return:
-    """
-    dbConn.close()
+        :param dbPath: sqlite3 database file
+        :return: database connection object
+        """
+        self.conn = sqlite3.connect(self.dbPath)
 
 
-def getAll(tableName, coin,  dbConn):
-    """get all records by specified database table
+    def closeDB(self):
+        """close sqlite3 connection
 
-    :param tableName: the name of database table
-    :param coin: the name of coin
-    :param dbConn: sqlite3 connection object
-    :return: all records by specified database table
-    """
-    c = dbConn.cursor()
+        :param dbConn:
+        :return:
+        """
+        self.conn.close()
 
-    cursor = c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
 
-    return cursor
+    def getAll(self, tableName, coin):
+        """get all records by specified database table
+
+        :param tableName: the name of database table
+        :param coin: the name of coin
+        :return: all records by specified database table
+        """
+        c = self.conn.cursor()
+        cursor = c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
+
+        return cursor

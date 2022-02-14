@@ -1,4 +1,4 @@
-import os
+# -*- coding:utf8 -*-
 
 def getFileContent(path):
     """get specified file content
