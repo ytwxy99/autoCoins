@@ -7,6 +7,7 @@ from database import sqlite3
 from utils import file
 from utils import pandas
 
+COINTEGRATION_DB = "cointegration"
 
 def initDatabase(dbPath):
     """init database object
@@ -29,7 +30,7 @@ def pandasSeries(database, coins):
     for coin in coins:
         date = list()
         price = list()
-        coinHistories = database.getAll("history_day", coin)
+        coinHistories = database.getHisotryDay("history_day", coin)
         for h in coinHistories:
             date.append(h[1])
             price.append(h[2])
@@ -67,6 +68,7 @@ def main():
     try:
         cointResult = dict()
         database = initDatabase(sys.argv[1])
+
         coins = [coin.strip("\n") for coin in file.getFileContent(sys.argv[2])]
         series = pandasSeries(database, coins)
         storeCoints = getCointegration(coins, series)
@@ -78,10 +80,16 @@ def main():
                     cointResult[pair] = pValue
 
         coints = sorted(cointResult.items(), key=lambda x: x[1], reverse=False)
+        for coint in coints:
+            cointP = database.getCointegration(COINTEGRATION_DB, coint[0]).fetchall()
+            if len(cointP) > 0:
+                database.updateCointegration(COINTEGRATION_DB, coint[0], coint[1])
+            else:
+                database.insertCointegration(COINTEGRATION_DB, coint[0], coint[1])
+
     except Exception as e:
         print(e)
     finally:
-        print(coints)
         database.closeDB()
 
 

@@ -42,7 +42,7 @@ func InitCurrencyPairs(client *gateapi.APIClient, pairs []gateapi.CurrencyPair, 
 				}
 			}
 
-			if utils.StringToFloat32(values[0][1]) >= 200000.0 {
+			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 200000.0 {
 				coins = append(coins, pair.Id)
 			}
 		}
