@@ -77,3 +77,12 @@ type HistoryDay struct {
 func (HistoryDay HistoryDay) TableName() string {
 	return "history_day"
 }
+
+type Cointegration struct {
+	Pair   string `json:"pair"  gorm:"primary_key"`
+	Pvalue string
+}
+
+func (cointegration Cointegration) TableName() string {
+	return "cointegration"
+}
