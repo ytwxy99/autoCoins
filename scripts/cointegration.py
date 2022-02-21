@@ -63,17 +63,25 @@ def getCointegration(coins, series):
 
 
 def main():
+    # ref: https://www.likecs.com/show-204274989.html
     try:
+        cointResult = dict()
         database = initDatabase(sys.argv[1])
         coins = [coin.strip("\n") for coin in file.getFileContent(sys.argv[2])]
         series = pandasSeries(database, coins)
         storeCoints = getCointegration(coins, series)
-        #TODO(ytwxy99), cointegration judgment
-        print(storeCoints)
+        #NOTE(wangxiaoyu), cointegration judgment
+        for coin in coins:
+            for pair in storeCoints[coin]["coint"].keys():
+                pValue = float(storeCoints[coin]["coint"][pair][1])
+                if pValue <= 0.05 and pValue != 0.0:
+                    cointResult[pair] = pValue
 
+        coints = sorted(cointResult.items(), key=lambda x: x[1], reverse=False)
     except Exception as e:
         print(e)
     finally:
+        print(coints)
         database.closeDB()
 
 
