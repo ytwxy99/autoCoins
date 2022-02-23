@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/gateway"
 	"github.com/ytwxy99/autoCoins/trade"
@@ -26,17 +25,24 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			initErr := make(chan error)
 			go func() {
 				for {
-					logrus.Info("update sport all coins into csv ……")
-					result, err := c.GetSpotAllCoins(client, ctx)
-					if err != nil {
-						logrus.Error("get sport all coins error: %s\n", err)
-					}
-					err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
+					logrus.Info("Initialize trading system ……")
+					//result, err := c.GetSpotAllCoins(client, ctx)
+					//if err != nil {
+					//	logrus.Error("get sport all coins error: %s\n", err)
+					//}
+
+					//err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
+					//if err != nil {
+					//	initErr <- err
+					//}
+					//logrus.Info("update sport all coins into csv finished!")
+
+					err := InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CoinCsv)
 					if err != nil {
 						initErr <- err
 					}
+					logrus.Info("Calculate cointegration successful!")
 
-					logrus.Info("update sport all coins into csv finished!")
 					// update coins list over specified interval time.
 					time.Sleep(3600 * time.Second)
 				}
@@ -45,7 +51,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			select {
 			case err := <-initErr:
 				{
-					logrus.Error("update sport all coins into csv error: %s\n", err)
+					logrus.Error("Initialize trading system error: %s\n", err)
 				}
 			}
 		},

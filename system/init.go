@@ -1,7 +1,9 @@
 package system
 
 import (
+	"fmt"
 	"gorm.io/gorm"
+	"os/exec"
 	"time"
 
 	"github.com/gateio/gateapi-go/v6"
@@ -49,6 +51,19 @@ func InitCurrencyPairs(client *gateapi.APIClient, pairs []gateapi.CurrencyPair, 
 	}
 
 	return utils.WriteLines(coins, filePath)
+}
+
+func InitCointegration(dbPath string, scriptPath string, coinCsv string) error {
+	fmt.Println(scriptPath, dbPath, coinCsv)
+	cmd := exec.Command("python3", scriptPath, dbPath, coinCsv)
+	output, err := cmd.Output()
+	fmt.Println(string(output))
+	if err != nil {
+		logrus.Error("run cointegration python srcipt error:", err)
+		return err
+	}
+
+	return nil
 }
 
 // init system base data

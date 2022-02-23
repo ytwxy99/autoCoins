@@ -55,6 +55,11 @@ def getCointegration(coins, series):
                 continue
 
             if len(series[coin]) == len(series[c]):
+                #todo(wangxiaoyu), find out why an error is reported
+                # when the length of series[coins] and series[c] is 1
+                if len(series[coin]) < 100:
+                    continue
+
                 cointRelation = coin + '-' + c
                 coin_result = ts.coint(series[coin], series[c])
                 storeCoints[coin]["coins"].append(c)
