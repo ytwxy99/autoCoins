@@ -41,7 +41,12 @@ def pandasSeries(database, coins):
 
 
 def getCointegration(coins, series):
-    """get the cointegration of all coins"""
+    """get the cointegration of all coins
+
+    :param coins: all coins information
+    :param series: coins series
+    :return: the cointegration of coins
+    """
     storeCoints = dict()
     for coin in coins:
         if coin not in storeCoints:
