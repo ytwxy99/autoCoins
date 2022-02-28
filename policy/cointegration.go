@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"math"
 	"strings"
@@ -72,10 +71,10 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		}
 	}
 
-	if len(statistics) == 0 {
-		fmt.Println("can not find cointegration target!")
-	} else {
-		fmt.Println(statistics)
+	if len(statistics) != 0 {
+		for k, v := range statistics {
+			logrus.Info("Find cointegration buy point:", k, v)
+		}
 	}
 
 	return nil
