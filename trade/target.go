@@ -47,7 +47,7 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 }
 
 // find buy point target by doing cointegration
-func DoCointegration(db *gorm.DB) {
+func DoCointegration(client *gateapi.APIClient, db *gorm.DB) {
 	target = &policy.Cointegration{}
-	target.Target(db)
+	target.Target(client, db)
 }

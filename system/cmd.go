@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/gateway"
 	"github.com/ytwxy99/autoCoins/trade"
@@ -26,18 +27,18 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			go func() {
 				for {
 					logrus.Info("Initialize trading system ……")
-					//result, err := c.GetSpotAllCoins(client, ctx)
-					//if err != nil {
-					//	logrus.Error("get sport all coins error: %s\n", err)
-					//}
+					result, err := c.GetSpotAllCoins(client, ctx)
+					if err != nil {
+						logrus.Error("get sport all coins error: %s\n", err)
+					}
 
-					//err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
-					//if err != nil {
-					//	initErr <- err
-					//}
-					//logrus.Info("update sport all coins into csv finished!")
+					err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
+					if err != nil {
+						initErr <- err
+					}
+					logrus.Info("update sport all coins into csv finished!")
 
-					err := InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CoinCsv)
+					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CoinCsv)
 					if err != nil {
 						initErr <- err
 					}

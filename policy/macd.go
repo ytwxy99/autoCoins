@@ -14,7 +14,7 @@ func GetMacd(values [][]string, short int, long int, M int) []map[string]string 
 	for _, value := range values {
 		m := make(map[string]string)
 		m["t"] = value[0] // time
-		m["v"] = value[1] // time
+		m["v"] = value[1] // volume
 		m["c"] = value[2] // close price
 		m["h"] = value[3] // high price
 		m["l"] = value[4] // low price
