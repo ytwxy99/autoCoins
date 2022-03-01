@@ -55,12 +55,29 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 				c, err := order.FetchOneOrder(db)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(client, db, sysConf, coin, "up")
+					go DoTradeForMacd(client, db, sysConf, coin, "up")
 				}
 			}
 		}
 
 	} else if t.Policy == "cointegration" {
-		DoCointegration(client, db)
+		var buyCoins = make(chan string, 2)
+		go DoCointegration(client, db, buyCoins)
+
+		for {
+			select {
+			case coin := <-buyCoins:
+				logrus.Info("buy point : ", coin)
+				order := database.Order{
+					Contract:  coin,
+					Direction: "up",
+				}
+				c, err := order.FetchOneOrder(db)
+				if c == nil && err != nil {
+					// buy it.
+					go DoTradeForCoint(client, db, sysConf, coin, "up")
+				}
+			}
+		}
 	}
 }

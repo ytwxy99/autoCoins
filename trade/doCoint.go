@@ -13,17 +13,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type Session struct {
-	Coin        string
-	TotalVolume float32
-	TotalAmount float32
-	TotalFees   float32
-	Orders      []database.Order
-}
-
 // Sells, adjusts TP and SL according to trailing values
 // and buys new coins
-func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string) {
+func DoTradeForCoint(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string) {
 	// set necessary vars
 	var volume float32
 	var amount float32
@@ -103,7 +95,7 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 				logrus.Infof("updated tp: %s, new_top_price: %s", newTp, newTopPrice)
 				logrus.Infof("updated sl: %s, new_stop_price: %s", newSl, newStopPrice)
 				//} else if lastPrice < (storedPrice + storedPrice*order.Sl/100) {
-			} else if math.Abs(float64((lastPrice-storedPrice)/storedPrice)) >= 0.15 {
+			} else if math.Abs(float64((lastPrice-storedPrice)/storedPrice)) >= 0.1 {
 				// sell coin
 				// TODO(ytwxy99), why do it by this way？
 				fees := order.Fee

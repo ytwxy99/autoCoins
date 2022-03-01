@@ -45,7 +45,11 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 
 // find buy point by doing cointegration
 func (*Cointegration) Target(args ...interface{}) interface{} {
+	buyCoins := []string{}
+	priceDiff := make(map[string]float32)
+	duplicates := make(map[string]int32)
 	statistics := make(map[string]float64)
+
 	//convert specified type
 	client := args[0].(*gateapi.APIClient)
 	db := args[1].(*gorm.DB)
@@ -63,19 +67,45 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		k1 := interfaces.K(client, pairs[1], -3, "1d")
 		price0 := (utils.StringToFloat32(k0[3][2]) - utils.StringToFloat32(k0[2][2])) / utils.StringToFloat32(k0[2][2])
 		price1 := (utils.StringToFloat32(k1[3][2]) - utils.StringToFloat32(k1[2][2])) / utils.StringToFloat32(k1[2][2])
+		priceDiff[pairs[0]] = price0
+		priceDiff[pairs[0]] = price1
 
 		if math.Abs(float64(price0-price1)) >= 0.2 && (price0 > 0 || price1 > 0) {
 			if _, ok := statistics[value.Pair]; !ok {
 				statistics[value.Pair] = math.Abs(float64(price0 - price1))
+			}
+			contractNames := strings.Split(value.Pair, "-")
+			for _, name := range contractNames {
+				if _, ok := duplicates[name]; ok {
+					duplicates[name]++
+				} else {
+					duplicates[name] = 1
+				}
 			}
 		}
 	}
 
 	if len(statistics) != 0 {
 		for k, v := range statistics {
-			logrus.Info("Find cointegration buy point:", k, v)
-		}
-	}
+			for _, name := range strings.Split(k, "-") {
+				if duplicates[name] > 1 {
+					logrus.Warn("Suspected to be buying point:", k, " price diff: ", v)
+					continue
+				}
+			}
 
-	return nil
+			paris := strings.Split(k, "-")
+			if priceDiff[paris[0]] > priceDiff[paris[1]] {
+				buyCoins = append(buyCoins, paris[0])
+				logrus.Info("Find cointegration buy point:", paris[0], " price diff:", priceDiff[paris[0]])
+			} else {
+				buyCoins = append(buyCoins, paris[1])
+				logrus.Info("Find cointegration buy point:", paris[1], " price diff:", priceDiff[paris[1]])
+			}
+		}
+
+		return buyCoins
+	} else {
+		return nil
+	}
 }

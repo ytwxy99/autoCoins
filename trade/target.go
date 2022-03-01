@@ -47,7 +47,35 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 }
 
 // find buy point target by doing cointegration
-func DoCointegration(client *gateapi.APIClient, db *gorm.DB) {
+func DoCointegration(client *gateapi.APIClient, db *gorm.DB, buyCoins chan<- string) {
 	target = &policy.Cointegration{}
-	target.Target(client, db)
+	for {
+		coins := target.Target(client, db).([]string)
+		if coins != nil {
+			for _, coin := range coins {
+				//NOTE(ytwxy99), do real trade.
+				inOrder := database.InOrder{
+					Contract:  coin,
+					Direction: "up",
+				}
+
+				record, err := inOrder.FetchOneInOrder(db)
+				if err != nil {
+					logrus.Info("Can't find : ", coin)
+				}
+
+				if record == nil {
+					// do buy
+					err = (&inOrder).AddInOrder(db)
+					if err != nil {
+						logrus.Errorf("add InOrder error : %s , inOrder is %s:", err, inOrder)
+						continue
+					}
+					buyCoins <- coin
+					logrus.Info("Find it!  to get it : ", coin)
+				}
+			}
+		}
+	}
+
 }
