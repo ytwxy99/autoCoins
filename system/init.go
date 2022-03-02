@@ -54,7 +54,6 @@ func InitCurrencyPairs(client *gateapi.APIClient, pairs []gateapi.CurrencyPair, 
 }
 
 func InitCointegration(dbPath string, scriptPath string, coinCsv string) error {
-	fmt.Println(scriptPath, dbPath, coinCsv)
 	cmd := exec.Command("python3", scriptPath, dbPath, coinCsv)
 	output, err := cmd.Output()
 	fmt.Println(string(output))
