@@ -97,10 +97,10 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
 				buyCoins = append(buyCoins, paris[0])
-				logrus.Info("Find cointegration buy point:", paris[0], " price diff:", priceDiff[paris[0]])
+				logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k)
 			} else {
 				buyCoins = append(buyCoins, paris[1])
-				logrus.Info("Find cointegration buy point:", paris[1], " price diff:", priceDiff[paris[1]])
+				logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k)
 			}
 		}
 
