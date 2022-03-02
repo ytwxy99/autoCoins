@@ -31,6 +31,6 @@ func (inOrder *InOrder) UpdateInOrder(db *gorm.DB) error {
 
 // delete order
 func (inOrder *InOrder) DeleteInOrder(db *gorm.DB) error {
-	tx := db.Delete(inOrder)
+	tx := db.Where("contract = ? and direction = ?", inOrder.Contract, inOrder.Contract).Delete(inOrder)
 	return tx.Error
 }
