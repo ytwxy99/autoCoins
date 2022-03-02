@@ -51,7 +51,7 @@ func DoCointegration(client *gateapi.APIClient, db *gorm.DB, buyCoins chan<- str
 	target = &policy.Cointegration{}
 	for {
 		coins := target.Target(client, db).([]string)
-		if coins != nil {
+		if len(coins) != 0 {
 			for _, coin := range coins {
 				//NOTE(ytwxy99), do real trade.
 				inOrder := database.InOrder{

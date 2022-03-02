@@ -106,6 +106,6 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 
 		return buyCoins
 	} else {
-		return nil
+		return buyCoins
 	}
 }
