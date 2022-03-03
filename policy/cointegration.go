@@ -43,6 +43,26 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 	return newCoints
 }
 
+// MACD condition judge
+func macdJudge(client *gateapi.APIClient, coin string) bool {
+	// judge depends '4 hours' data
+	k4hValues := interfaces.K(client, coin, -100, "4h")
+	if k4hValues != nil {
+		k4hMacds := GetMacd(k4hValues, 12, 26, 9)
+		nowK4h := len(k4hMacds) - 1
+		if nowK4h < 5 {
+			return false
+		}
+
+		macdValue := utils.StringToFloat32(k4hMacds[nowK4h]["macd"])
+		if macdValue > 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
 // find buy point by doing cointegration
 func (*Cointegration) Target(args ...interface{}) interface{} {
 	buyCoins := []string{}
@@ -96,11 +116,15 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
-				buyCoins = append(buyCoins, paris[1])
-				logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
+				if macdJudge(client, paris[1]) {
+					buyCoins = append(buyCoins, paris[1])
+					logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
+				}
 			} else {
-				buyCoins = append(buyCoins, paris[0])
-				logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
+				if macdJudge(client, paris[0]) {
+					buyCoins = append(buyCoins, paris[0])
+					logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
+				}
 			}
 		}
 
