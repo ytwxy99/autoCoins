@@ -45,7 +45,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 					logrus.Info("Calculate cointegration successful!")
 
 					// update coins list over specified interval time.
-					time.Sleep(3600 * time.Second)
+					time.Sleep(3600 * 24 * time.Second)
 				}
 			}()
 
