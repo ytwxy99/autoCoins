@@ -2,6 +2,7 @@ package policy
 
 import (
 	"gorm.io/gorm"
+	"k8s.io/apiserver/pkg/admission"
 	"math"
 	"strings"
 
@@ -63,6 +64,22 @@ func macdJudge(client *gateapi.APIClient, coin string) bool {
 	return false
 }
 
+// can be traded or not
+func tradeJugde(coin string, db *gorm.DB) bool {
+	inOrder := database.InOrder{
+		Contract:  coin,
+		Direction: "up",
+	}
+
+	record, err := inOrder.FetchOneInOrder(db)
+	if err != nil && record == nil {
+		return true
+	} else {
+		return false
+	}
+
+}
+
 // find buy point by doing cointegration
 func (*Cointegration) Target(args ...interface{}) interface{} {
 	buyCoins := []string{}
@@ -114,16 +131,21 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 				}
 			}
 
+			//TODO(wangxiaoyu), need to optimize buying points.
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
 				if macdJudge(client, paris[1]) {
-					buyCoins = append(buyCoins, paris[1])
-					logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
+					if tradeJugde(paris[1], db) {
+						buyCoins = append(buyCoins, paris[1])
+						logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
+					}
 				}
 			} else {
 				if macdJudge(client, paris[0]) {
-					buyCoins = append(buyCoins, paris[0])
-					logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
+					if tradeJugde(paris[0], db) {
+						buyCoins = append(buyCoins, paris[0])
+						logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
+					}
 				}
 			}
 		}

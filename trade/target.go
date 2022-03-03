@@ -61,7 +61,7 @@ func DoCointegration(client *gateapi.APIClient, db *gorm.DB, buyCoins chan<- str
 
 				record, err := inOrder.FetchOneInOrder(db)
 				if err != nil {
-					logrus.Info("Can't find : ", coin)
+					logrus.Info("Can't find in inOrder record, then will be traded : ", coin)
 				}
 
 				if record == nil {
