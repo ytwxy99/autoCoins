@@ -2,7 +2,6 @@ package policy
 
 import (
 	"gorm.io/gorm"
-	"k8s.io/apiserver/pkg/admission"
 	"math"
 	"strings"
 
