@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/ytwxy99/autoCoins/configuration"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
+
+	"github.com/ytwxy99/autoCoins/configuration"
 )
 
 // read Key&Secret from yaml
