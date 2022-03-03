@@ -102,7 +102,7 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 				logrus.Infof("updated tp: %s, new_top_price: %s", newTp, newTopPrice)
 				logrus.Infof("updated sl: %s, new_stop_price: %s", newSl, newStopPrice)
 				//} else if lastPrice < (storedPrice + storedPrice*order.Sl/100) {
-			} else if SellPolicy(policy, lastPrice, storedPrice) {
+			} else if f(policy, lastPrice, storedPrice) {
 				// sell coin
 				// TODO(ytwxy99), why do it by this way？
 				fees := order.Fee
