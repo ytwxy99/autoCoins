@@ -80,7 +80,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	}
 
 	coints = removeDuplicate(coints)
-	logrus.Info("P-Value less than 0.000001, totally: ", len(coints))
+	//logrus.Info("P-Value less than 0.000001, totally: ", len(coints))
 	for _, value := range coints {
 		pairs := strings.Split(value.Pair, "-")
 		k0 := interfaces.K(client, pairs[0], -3, "1d")
