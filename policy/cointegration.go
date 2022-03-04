@@ -101,6 +101,11 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		pairs := strings.Split(value.Pair, "-")
 		k0 := interfaces.K(client, pairs[0], -3, "1d")
 		k1 := interfaces.K(client, pairs[1], -3, "1d")
+		if k0 == nil || k1 == nil {
+			// get k data failed
+			continue
+		}
+
 		price0 := (utils.StringToFloat32(k0[3][2]) - utils.StringToFloat32(k0[2][2])) / utils.StringToFloat32(k0[2][2])
 		price1 := (utils.StringToFloat32(k1[3][2]) - utils.StringToFloat32(k1[2][2])) / utils.StringToFloat32(k1[2][2])
 		priceDiff[pairs[0]] = price0
