@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 	"os/exec"
 	"time"
@@ -55,8 +54,7 @@ func InitCurrencyPairs(client *gateapi.APIClient, pairs []gateapi.CurrencyPair, 
 
 func InitCointegration(dbPath string, scriptPath string, coinCsv string) error {
 	cmd := exec.Command("python3", scriptPath, dbPath, coinCsv)
-	output, err := cmd.Output()
-	fmt.Println(string(output))
+	_, err := cmd.Output()
 	if err != nil {
 		logrus.Error("run cointegration python srcipt error:", err)
 		return err
