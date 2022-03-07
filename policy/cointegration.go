@@ -46,7 +46,7 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 // MACD condition judge
 func macdJudge(client *gateapi.APIClient, coin string, level string) bool {
 	// judge depends '4 hours' data
-	k4hValues := interfaces.K(client, coin, -100, level)
+	k4hValues := interfaces.K(client, coin, -50, level)
 	if k4hValues != nil {
 		k4hMacds := GetMacd(k4hValues, 12, 26, 9)
 		nowK4h := len(k4hMacds) - 1
