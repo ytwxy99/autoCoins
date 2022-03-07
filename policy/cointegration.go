@@ -138,14 +138,14 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			//TODO(wangxiaoyu), need to optimize buying points.
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
-				if macdJudge(client, paris[1], -100, "4h") && macdJudge(client, paris[1], -50, "15m") {
+				if macdJudge(client, paris[1], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
 					if tradeJugde(paris[1], db) {
 						buyCoins = append(buyCoins, paris[1])
 						logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
 					}
 				}
 			} else {
-				if macdJudge(client, paris[0], -100, "4h") && macdJudge(client, paris[1], -50, "15m") {
+				if macdJudge(client, paris[0], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
 					if tradeJugde(paris[0], db) {
 						buyCoins = append(buyCoins, paris[0])
 						logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
