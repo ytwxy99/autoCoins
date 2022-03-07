@@ -8,8 +8,8 @@ import (
 )
 
 // get k market data
-func K(client *gateapi.APIClient, currencyPair string, beforeDay int, interval string) [][]string {
-	from := utils.GetOldTimeStamp(0, 0, beforeDay)
+func K(client *gateapi.APIClient, currencyPair string, beforeInterval int, interval string) [][]string {
+	from := utils.GetOldTimeStamp(0, 0, beforeInterval)
 	to := utils.GetNowTimeStamp()
 	values := c.GetSpotCandlesticks(client, currencyPair, from, to, interval)
 
