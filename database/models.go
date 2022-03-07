@@ -62,6 +62,7 @@ type InOrder struct {
 
 	Contract  string
 	Direction string
+	Pair      string
 }
 
 func (inorder InOrder) TableName() string {

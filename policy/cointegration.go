@@ -140,6 +140,17 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
 				if macdJudge(client, paris[1], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
 					if tradeJugde(paris[1], db) {
+						inOrder := database.InOrder{
+							Contract:  paris[1],
+							Direction: "up",
+							Pair:      paris[0],
+						}
+						err = (&inOrder).AddInOrder(db)
+						if err != nil {
+							logrus.Errorf("add InOrder error in buy point : %s , inOrder is %s:", err, inOrder)
+							continue
+						}
+
 						buyCoins = append(buyCoins, paris[1])
 						logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
 					}
@@ -147,6 +158,17 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			} else {
 				if macdJudge(client, paris[0], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
 					if tradeJugde(paris[0], db) {
+						inOrder := database.InOrder{
+							Contract:  paris[0],
+							Direction: "up",
+							Pair:      paris[1],
+						}
+						err = (&inOrder).AddInOrder(db)
+						if err != nil {
+							logrus.Errorf("add InOrder error in buy point: %s , inOrder is %s:", err, inOrder)
+							continue
+						}
+
 						buyCoins = append(buyCoins, paris[0])
 						logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
 					}
