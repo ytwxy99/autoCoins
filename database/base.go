@@ -36,4 +36,5 @@ func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&InOrder{})
 	db.AutoMigrate(&HistoryDay{})
 	db.AutoMigrate(&Cointegration{})
+	db.AutoMigrate(&TradeDetail{})
 }
