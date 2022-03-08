@@ -1,8 +1,9 @@
 package database
 
 import (
-	"gorm.io/gorm"
 	"time"
+	
+	"gorm.io/gorm"
 )
 
 type Order struct {
@@ -86,4 +87,15 @@ type Cointegration struct {
 
 func (cointegration Cointegration) TableName() string {
 	return "cointegration"
+}
+
+type TradeDetail struct {
+	gorm.Model
+
+	Contract  string
+	CointPair string
+}
+
+func (tradeDetail TradeDetail) TableName() string {
+	return "trade_detail"
 }

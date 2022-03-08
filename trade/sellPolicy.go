@@ -1,7 +1,6 @@
 package trade
 
 import (
-	"github.com/ytwxy99/autoCoins/utils"
 	"math"
 
 	"github.com/gateio/gateapi-go/v6"
@@ -11,6 +10,7 @@ import (
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/interfaces"
 	py "github.com/ytwxy99/autoCoins/policy"
+	"github.com/ytwxy99/autoCoins/utils"
 )
 
 func SellPolicy(policy string, args ...interface{}) bool {
@@ -24,15 +24,13 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		//storedPrice := args[1].(float32)
 		coin := args[2].(string)
 		client := args[3].(*gateapi.APIClient)
-		direction := args[4].(string)
 		db := args[5].(*gorm.DB)
 
-		inOrder := database.InOrder{
-			Contract:  coin,
-			Direction: direction,
+		tradeDetail := database.TradeDetail{
+			Contract: coin,
 		}
 
-		record, err := inOrder.FetchOneInOrder(db)
+		record, err := tradeDetail.FetchOneTradeDetail(db)
 		if err != nil {
 			logrus.Info("Can't find coin-pair in inOrder record, then trade will be canceled : ", coin)
 			return false
@@ -44,7 +42,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		//}
 
 		// conditions no.2
-		k15mValues := interfaces.K(client, record.Pair, -10, "15m")
+		k15mValues := interfaces.K(client, record.CointPair, -10, "15m")
 		if k15mValues != nil {
 			k4mMacds := py.GetMacd(k15mValues, 12, 26, 9)
 			if len(k4mMacds) < 10 {
