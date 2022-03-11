@@ -62,7 +62,7 @@ def getCointegration(coins, series):
             if len(series[coin]) == len(series[c]):
                 #todo(wangxiaoyu), find out why an error is reported
                 # when the length of series[coins] and series[c] is 1
-                if len(series[coin]) < 100:
+                if len(series[coin]) < 900:
                     continue
 
                 cointRelation = coin + '-' + c

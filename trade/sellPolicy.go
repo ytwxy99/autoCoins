@@ -51,6 +51,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 
 			macdValue := utils.StringToFloat32(k4mMacds[len(k4mMacds)-1]["macd"])
 			if macdValue < 0 {
+				logrus.Info("Find sell point, then sell it : ", record.Contract, "Macd-Value", macdValue)
 				return true
 			}
 		}

@@ -22,7 +22,7 @@ func InitCurrencyPairs(client *gateapi.APIClient, pairs []gateapi.CurrencyPair, 
 	for _, pair := range pairs {
 		// just record coin which is tradable
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
-			values := interfaces.K(client, pair.Id, -730, "1d")
+			values := interfaces.K(client, pair.Id, -999, "1d")
 			for _, value := range values {
 				timeTrans, err := time.ParseInLocation("2006-01-02 08:00:00", value[0], time.Local)
 				if err != nil {
