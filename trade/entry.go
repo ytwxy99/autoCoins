@@ -75,7 +75,7 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 				c, err := order.FetchOneOrder(db)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(client, db, sysConf, coin, "up", "cointegation", SellPolicy)
+					go DoTrade(client, db, sysConf, coin, "up", "cointegration", SellPolicy)
 				}
 			}
 		}
