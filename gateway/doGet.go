@@ -61,7 +61,7 @@ func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
 			context.String(http.StatusInternalServerError, "Get last price failed: ", err)
 		}
 		lastPrice := utils.StringToFloat32(currentCoin[0].Last)
-		priceDiff := (lastPrice - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price)
+		priceDiff := (lastPrice - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100
 		contents = contents + fmt.Sprintf("order detail: coin -> %s, price -> %s, time -> %s, priceDiff -> %s \n", order.Contract, order.Price, order.CreatedAt, priceDiff)
 	}
 
