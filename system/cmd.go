@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 	"time"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,7 +16,7 @@ import (
 )
 
 // refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
-func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB) {
+func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB) {
 	// init action
 	var InitCmd = &cobra.Command{
 		Use:   "init [string to echo]",
@@ -27,12 +26,12 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			go func() {
 				for {
 					logrus.Info("Initialize trading system ……")
-					result, err := c.GetSpotAllCoins(client, ctx)
+					result, err := c.GetSpotAllCoins(ctx)
 					if err != nil {
-						logrus.Error("get sport all coins error: %s\n", err)
+						logrus.Error("get sport all coins error: %v\n", err)
 					}
 
-					err = InitCurrencyPairs(client, result, sysConf.CoinCsv, db)
+					err = InitCurrencyPairs(result, sysConf.CoinCsv, db)
 					if err != nil {
 						initErr <- err
 					}
@@ -52,7 +51,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			select {
 			case err := <-initErr:
 				{
-					logrus.Error("Initialize trading system error: %s\n", err)
+					logrus.Error("Initialize trading system error: %v\n", err)
 				}
 			}
 		},
@@ -63,7 +62,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 		Short: "Start autoCoins gateway",
 		Run: func(cmd *cobra.Command, args []string) {
 			router := gin.Default()
-			gateway.Router(client, router, sysConf, db)
+			gateway.Router(c.SpotClient, router, sysConf, db)
 		},
 	}
 
@@ -83,7 +82,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 				t := &trade.Trade{
 					Policy: "macd",
 				}
-				t.Entry(client, db, sysConf)
+				t.Entry(db, sysConf)
 			}
 
 		},
@@ -98,7 +97,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 			t := &trade.Trade{
 				Policy: "cointegration",
 			}
-			t.Entry(client, db, sysConf)
+			t.Entry(db, sysConf)
 		},
 	}
 

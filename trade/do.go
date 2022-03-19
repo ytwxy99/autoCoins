@@ -3,13 +3,13 @@ package trade
 import (
 	"time"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+
 	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/utils"
-	"gorm.io/gorm"
 )
 
 type Session struct {
@@ -22,7 +22,7 @@ type Session struct {
 
 // Sells, adjusts TP and SL according to trailing values
 // and buys new coins
-func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string, policy string, f func(policy string, args ...interface{}) bool) {
+func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string, policy string, f func(policy string, args ...interface{}) bool) {
 	// set necessary vars
 	var volume float32
 	var amount float32
@@ -62,9 +62,9 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 				continue
 			}
 
-			currentCoin, err := c.GetCurrencyPair(client, coin)
+			currentCoin, err := c.GetCurrencyPair(coin)
 			if err != nil {
-				logrus.Error("DoTrade -> get last price err:", err)
+				logrus.Error("DoTrade -> get last price err: %v", err)
 				continue
 			}
 			lastPrice := utils.StringToFloat32(currentCoin[0].Last)
@@ -99,10 +99,10 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 				order.UpdateOrder(db)
 				newTopPrice := storedPrice + (storedPrice * newTp / 100)
 				newStopPrice := storedPrice + (storedPrice * newSl / 100)
-				logrus.Infof("updated tp: %s, new_top_price: %s", newTp, newTopPrice)
-				logrus.Infof("updated sl: %s, new_stop_price: %s", newSl, newStopPrice)
+				logrus.Infof("updated tp: %v, new_top_price: %v", newTp, newTopPrice)
+				logrus.Infof("updated sl: %v, new_stop_price: %v", newSl, newStopPrice)
 				//} else if lastPrice < (storedPrice + storedPrice*order.Sl/100) {
-			} else if f(policy, lastPrice, storedPrice, coin, client, direction, db) {
+			} else if f(policy, lastPrice, storedPrice, coin, direction, db) {
 				// sell coin
 				// TODO(ytwxy99), why do it by this way？
 				fees := order.Fee
@@ -119,10 +119,10 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 
 				}
 
-				logrus.Infof("Sold %s with: price is %s; profit is %s% .", order.Contract, lastPrice, (lastPrice-storedPrice)/storedPrice*100)
+				logrus.Infof("Sold %v with: price is %v; profit is %v% .", order.Contract, lastPrice, (lastPrice-storedPrice)/storedPrice*100)
 				err = order.DeleteOrder(db)
 				if err != nil {
-					logrus.Errorf("delete Order error : %s , Sold is %s:", err, order)
+					logrus.Errorf("delete Order error : %v , Sold is %v:", err, order)
 				}
 
 				// store sold trades data
@@ -149,25 +149,25 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 				}
 				err = inOrder.DeleteInOrder(db)
 				if err != nil {
-					logrus.Errorf("delete inOrder error : %s , inOrder is %s:", err, inOrder)
+					logrus.Errorf("delete inOrder error : %v , inOrder is %v:", err, inOrder)
 				}
 				err = soldCoins.AddSold(db)
 				if err != nil {
-					logrus.Errorf("add Sold error : %s , Sold is %s:", err, soldCoins)
+					logrus.Errorf("add Sold error : %v , Sold is %v:", err, soldCoins)
 				}
 				break // this trade is over, break 'for{}'
 			}
 
 		} else if order == nil && coin != "" {
-			currentCoin, err := c.GetCurrencyPair(client, coin)
+			currentCoin, err := c.GetCurrencyPair(coin)
 			if err != nil {
-				logrus.Error("DoTrade -> get last price err:", err)
+				logrus.Error("DoTrade -> get last price err: %v", err)
 				continue
 			}
 			price := currentCoin[0].Last
 
 			if utils.StringToFloat32(price) == 0 {
-				logrus.Info("Re order when the price falls : ", price)
+				logrus.Info("Re order when the price falls : %v", price)
 				time.Sleep(500 * time.Millisecond)
 				continue // wait for positive price
 			}
@@ -215,9 +215,9 @@ func DoTrade(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.Syst
 			if sysConf.Options.Test {
 				// 价格在得到价格和实际交易过程中下跌，取消下单
 				time.Sleep(500 * time.Millisecond)
-				currentCoin, err := c.GetCurrencyPair(client, coin)
+				currentCoin, err := c.GetCurrencyPair(coin)
 				if err != nil {
-					logrus.Error("DoTrade -> get last price err:", err)
+					logrus.Error("DoTrade -> get last price err: %v", err)
 					continue
 				}
 				buyPrice := currentCoin[0].Last

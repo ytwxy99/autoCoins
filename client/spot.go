@@ -2,15 +2,19 @@ package client
 
 import (
 	"context"
+
 	"github.com/antihax/optional"
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
+
 	"github.com/ytwxy99/autoCoins/configuration"
 )
 
+var SpotClient *gateapi.APIClient
+
 // fetch spot client
 func GetSpotClient(apiv4 *configuration.GateAPIV4) (*gateapi.APIClient, context.Context) {
-	client := gateapi.NewAPIClient(gateapi.NewConfiguration())
+	SpotClient = gateapi.NewAPIClient(gateapi.NewConfiguration())
 	// Setting host is optional. It defaults to https://api.gateio.ws/api/v4
 	// client.ChangeBasePath(config.BaseUrl)
 	ctx := context.WithValue(context.Background(), gateapi.ContextGateAPIV4, gateapi.GateAPIV4{
@@ -18,18 +22,18 @@ func GetSpotClient(apiv4 *configuration.GateAPIV4) (*gateapi.APIClient, context.
 		Secret: apiv4.Secret,
 	})
 
-	return client, ctx
+	return SpotClient, ctx
 }
 
 // get all coins
-func GetSpotAllCoins(client *gateapi.APIClient, ctx context.Context) ([]gateapi.CurrencyPair, error) {
-	result, _, err := client.SpotApi.ListCurrencyPairs(ctx)
+func GetSpotAllCoins(ctx context.Context) ([]gateapi.CurrencyPair, error) {
+	result, _, err := SpotClient.SpotApi.ListCurrencyPairs(ctx)
 
 	if err != nil {
 		if e, ok := err.(gateapi.GateAPIError); ok {
-			logrus.Error("gate api error: %s\n", e.Error())
+			logrus.Errorf("gate api error: %+v\n", e.Error())
 		} else {
-			logrus.Error("generic error: %s\n", err.Error())
+			logrus.Errorf("generic error: %+v\n", err.Error())
 		}
 
 		return nil, err
@@ -39,7 +43,7 @@ func GetSpotAllCoins(client *gateapi.APIClient, ctx context.Context) ([]gateapi.
 }
 
 // get spot Market candlesticks
-func GetSpotCandlesticks(client *gateapi.APIClient, currencyPair string, from int64, to int64, interval string) [][]string {
+func GetSpotCandlesticks(currencyPair string, from int64, to int64, interval string) [][]string {
 	ctx := context.Background()
 	opts := &gateapi.ListCandlesticksOpts{
 		From:     optional.NewInt64(from),
@@ -47,12 +51,12 @@ func GetSpotCandlesticks(client *gateapi.APIClient, currencyPair string, from in
 		Interval: optional.NewString(interval),
 	}
 
-	result, _, err := client.SpotApi.ListCandlesticks(ctx, currencyPair, opts)
+	result, _, err := SpotClient.SpotApi.ListCandlesticks(ctx, currencyPair, opts)
 	if err != nil {
 		if e, ok := err.(gateapi.GateAPIError); ok {
-			logrus.Error("gate api error: %s\n", e.Error())
+			logrus.Errorf("gate api error: %+v\n", e.Error())
 		} else {
-			logrus.Error("generic error: %s\n", err.Error())
+			logrus.Errorf("generic error: %+v\n", err.Error())
 		}
 		return nil
 	}
@@ -61,18 +65,18 @@ func GetSpotCandlesticks(client *gateapi.APIClient, currencyPair string, from in
 }
 
 // Get details of a specifc order
-func GetCurrencyPair(client *gateapi.APIClient, currencyPair string) ([]gateapi.Ticker, error) {
+func GetCurrencyPair(currencyPair string) ([]gateapi.Ticker, error) {
 	ctx := context.Background()
 
 	opts := &gateapi.ListTickersOpts{
 		CurrencyPair: optional.NewString(currencyPair),
 	}
-	result, _, err := client.SpotApi.ListTickers(ctx, opts)
+	result, _, err := SpotClient.SpotApi.ListTickers(ctx, opts)
 	if err != nil {
 		if e, ok := err.(gateapi.GateAPIError); ok {
-			logrus.Error("gate api error:", e.Error())
+			logrus.Errorf("gate api error: %+v", e.Error())
 		} else {
-			logrus.Error("generic error:", err.Error())
+			logrus.Errorf("generic error: %+v", err.Error())
 		}
 		return []gateapi.Ticker{}, err
 	}

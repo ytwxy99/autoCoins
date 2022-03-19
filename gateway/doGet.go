@@ -35,7 +35,7 @@ func ReadSold(context *gin.Context, db *gorm.DB) {
 	var sum float32
 	solds, err := database.GetAllSold(db)
 	if err != nil {
-		logrus.Error("get all solds err: ", err)
+		logrus.Error("get all solds err: %v", err)
 	}
 
 	for _, sold := range solds {
@@ -52,16 +52,16 @@ func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
 	var contents string
 	orders, err := database.GetAllOrder(db)
 	if err != nil {
-		logrus.Error("get all orders err: ", err)
+		logrus.Error("get all orders err: %v", err)
 	}
 
 	for _, order := range orders {
-		currentCoin, err := c.GetCurrencyPair(client, order.Contract)
+		currentCoin, err := c.GetCurrencyPair(order.Contract)
 		if err != nil {
 			context.String(http.StatusInternalServerError, "Get last price failed: ", err)
 		}
-		lastPrice := utils.StringToFloat32(currentCoin[0].Last)
-		priceDiff := (lastPrice - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100
+
+		priceDiff := utils.PriceDiffPercent(currentCoin[0].Last, order.Price)
 		contents = contents + fmt.Sprintf("order detail: coin -> %s, price -> %s, time -> %s, priceDiff -> %s \n", order.Contract, order.Price, order.CreatedAt, priceDiff)
 	}
 

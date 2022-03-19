@@ -5,7 +5,6 @@ import (
 	_ "net/http/pprof"
 	"runtime"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
@@ -19,7 +18,7 @@ type Trade struct {
 }
 
 // trade entry point
-func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configuration.SystemConf) {
+func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 	var buyCoins = make(chan string, 2)
 	// use all cpus
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -32,15 +31,15 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 	if t.Policy == "macd" {
 		coins, err := utils.ReadLines(sysConf.CoinCsv)
 		if err != nil {
-			logrus.Error("Read local file error:", err)
+			logrus.Error("Read local file error: %v", err)
 			return
 		}
 
 		for i := 0; i < (len(coins)/10 + 1); i++ {
 			if i == len(coins)/10 {
-				go FindMacdTarget(client, db, coins[i*10:i*10+len(coins)%10], buyCoins)
+				go FindMacdTarget(db, coins[i*10:i*10+len(coins)%10], buyCoins)
 			} else {
-				go FindMacdTarget(client, db, coins[i*10:i*10+9], buyCoins)
+				go FindMacdTarget(db, coins[i*10:i*10+9], buyCoins)
 			}
 		}
 
@@ -55,14 +54,14 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 				c, err := order.FetchOneOrder(db)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(client, db, sysConf, coin, "up", "macd", SellPolicy)
+					go DoTrade(db, sysConf, coin, "up", "macd", SellPolicy)
 				}
 			}
 		}
 
 	} else if t.Policy == "cointegration" {
 		var buyCoins = make(chan string, 2)
-		go DoCointegration(client, db, buyCoins)
+		go DoCointegration(db, buyCoins)
 
 		for {
 			select {
@@ -75,7 +74,7 @@ func (t *Trade) Entry(client *gateapi.APIClient, db *gorm.DB, sysConf *configura
 				c, err := order.FetchOneOrder(db)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(client, db, sysConf, coin, "up", "cointegration", SellPolicy)
+					go DoTrade(db, sysConf, coin, "up", "cointegration", SellPolicy)
 				}
 			}
 		}

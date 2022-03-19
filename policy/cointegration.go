@@ -5,7 +5,6 @@ import (
 	"math"
 	"strings"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ytwxy99/autoCoins/database"
@@ -44,9 +43,8 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 }
 
 // MACD condition judge
-func macdJudge(client *gateapi.APIClient, coin string, interval int, level string) bool {
-	// judge depends '4 hours' data
-	k4hValues := interfaces.K(client, coin, interval, level)
+func macdJudge(coin string, interval int, level string) bool {
+	k4hValues := interfaces.Market(coin, interval, level)
 	if k4hValues != nil {
 		k4hMacds := GetMacd(k4hValues, 12, 26, 9)
 		nowK4h := len(k4hMacds) - 1
@@ -87,33 +85,38 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	statistics := make(map[string]float64)
 
 	//convert specified type
-	client := args[0].(*gateapi.APIClient)
-	db := args[1].(*gorm.DB)
+	db := args[0].(*gorm.DB)
 
 	coints, err := database.GetAllCoint(db)
 	if err != nil {
-		logrus.Error("get cointegration from database error:", err)
+		logrus.Error("get cointegration from database error: %v", err)
 	}
 
+	//TODO(wangxiaoyu), maybe have a bug here.
 	coints = removeDuplicate(coints)
-	//logrus.Info("P-Value less than 0.000001, totally: ", len(coints))
+
 	for _, value := range coints {
 		pairs := strings.Split(value.Pair, "-")
-		k0 := interfaces.K(client, pairs[0], -3, "1d")
-		k1 := interfaces.K(client, pairs[1], -3, "1d")
+		if len(pairs) != 2 {
+			logrus.Error("coints pair record error")
+			continue
+		}
+
+		k0 := interfaces.Market(pairs[0], -3, "1d")
+		k1 := interfaces.Market(pairs[1], -3, "1d")
 		if k0 == nil || k1 == nil {
 			// get k data failed
 			continue
 		}
 
-		price0 := (utils.StringToFloat32(k0[3][2]) - utils.StringToFloat32(k0[2][2])) / utils.StringToFloat32(k0[2][2])
-		price1 := (utils.StringToFloat32(k1[3][2]) - utils.StringToFloat32(k1[2][2])) / utils.StringToFloat32(k1[2][2])
-		priceDiff[pairs[0]] = price0
-		priceDiff[pairs[0]] = price1
+		diff0 := utils.PriceDiffPercent(k0[3][2], k0[2][2])
+		diff1 := utils.PriceDiffPercent(k1[3][2], k1[2][2])
+		priceDiff[pairs[0]] = diff0
+		priceDiff[pairs[1]] = diff1
 
-		if math.Abs(float64(price0-price1)) >= 0.2 && (price0 > 0 || price1 > 0) {
+		if math.Abs(float64(diff0-diff1)) >= 0.2 && (diff0 > 0 || diff1 > 0) {
 			if _, ok := statistics[value.Pair]; !ok {
-				statistics[value.Pair] = math.Abs(float64(price0 - price1))
+				statistics[value.Pair] = math.Abs(float64(diff0 - diff1))
 			}
 			contractNames := strings.Split(value.Pair, "-")
 			for _, name := range contractNames {
@@ -128,17 +131,16 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 
 	if len(statistics) != 0 {
 		for k, v := range statistics {
-			for _, name := range strings.Split(k, "-") {
-				if duplicates[name] > 1 {
-					logrus.Warn("Suspected to be buying point:", k, " price diff: ", v)
-					continue
-				}
+			pairs := strings.Split(k, "-")
+			if len(pairs) == 2 && (duplicates[pairs[0]] > 1 || duplicates[pairs[1]] > 1) {
+				logrus.Warnf("Suspected to be buying point: %v", k, " price diff: %v", v)
+				continue
 			}
 
 			//TODO(wangxiaoyu), need to optimize buying points.
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
-				if macdJudge(client, paris[1], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
+				if macdJudge(paris[1], -100, "4h") && macdJudge(paris[1], -10, "15m") {
 					if tradeJugde(paris[1], db) {
 						tradeDetail := database.TradeDetail{
 							Contract:  paris[1],
@@ -146,16 +148,16 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 						}
 						err = (&tradeDetail).AddTradeDetail(db)
 						if err != nil {
-							logrus.Errorf("add TradeDetail error in buy point : %s , inOrder is %s:", err, tradeDetail)
+							logrus.Errorf("add TradeDetail error in buy point : %v , inOrder is %v:", err, tradeDetail)
 							continue
 						}
 
 						buyCoins = append(buyCoins, paris[1])
-						logrus.Info("Find cointegration buy point:", paris[1], " contract pairs:", k, " price diff:", priceDiff[paris[1]])
+						logrus.Info("Find cointegration buy point: %v", paris[1], " contract pairs: %v", k, " price diff: %v", priceDiff[paris[1]])
 					}
 				}
 			} else {
-				if macdJudge(client, paris[0], -100, "4h") && macdJudge(client, paris[1], -10, "15m") {
+				if macdJudge(paris[0], -100, "4h") && macdJudge(paris[1], -10, "15m") {
 					if tradeJugde(paris[0], db) {
 						tradeDetail := database.TradeDetail{
 							Contract:  paris[0],
@@ -163,12 +165,12 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 						}
 						err = (&tradeDetail).AddTradeDetail(db)
 						if err != nil {
-							logrus.Errorf("add TradeDetail error in buy point : %s , inOrder is %s:", err, tradeDetail)
+							logrus.Errorf("add TradeDetail error in buy point : %v , inOrder is : %v", err, tradeDetail)
 							continue
 						}
 
 						buyCoins = append(buyCoins, paris[0])
-						logrus.Info("Find cointegration buy point:", paris[0], " contract pairs:", k, " price diff:", priceDiff[paris[0]])
+						logrus.Info("Find cointegration buy point: %v", paris[0], " contract pairs: %v", k, " price diff: %v", priceDiff[paris[0]])
 					}
 				}
 			}

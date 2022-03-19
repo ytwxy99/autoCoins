@@ -3,7 +3,6 @@ package trade
 import (
 	"gorm.io/gorm"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ytwxy99/autoCoins/database"
@@ -13,12 +12,12 @@ import (
 var target policy.Policy
 
 // find macd buy point target
-func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyCoins chan<- string) {
+func FindMacdTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
 	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {
-			macdCondition := target.Target(client, coin).(bool)
-			if macdCondition {
+			condition := target.Target(coin).(bool)
+			if condition {
 				//NOTE(ytwxy99), do real trade.
 				inOrder := database.InOrder{
 					Contract:  coin,
@@ -34,7 +33,7 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 					// do buy
 					err = (&inOrder).AddInOrder(db)
 					if err != nil {
-						logrus.Errorf("add InOrder error : %s , inOrder is %s:", err, inOrder)
+						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 						continue
 					}
 					buyCoins <- coin
@@ -47,10 +46,10 @@ func FindMacdTarget(client *gateapi.APIClient, db *gorm.DB, coins []string, buyC
 }
 
 // find buy point target by doing cointegration
-func DoCointegration(client *gateapi.APIClient, db *gorm.DB, buyCoins chan<- string) {
+func DoCointegration(db *gorm.DB, buyCoins chan<- string) {
 	target = &policy.Cointegration{}
 	for {
-		coins := target.Target(client, db).([]string)
+		coins := target.Target(db).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
 				//NOTE(ytwxy99), do real trade.
@@ -68,7 +67,7 @@ func DoCointegration(client *gateapi.APIClient, db *gorm.DB, buyCoins chan<- str
 					// do buy
 					err = (&inOrder).AddInOrder(db)
 					if err != nil {
-						logrus.Errorf("add InOrder error : %s , inOrder is %s:", err, inOrder)
+						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 						continue
 					}
 					buyCoins <- coin

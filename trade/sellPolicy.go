@@ -3,7 +3,6 @@ package trade
 import (
 	"math"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
@@ -23,8 +22,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		//lastPrice := args[0].(float32)
 		//storedPrice := args[1].(float32)
 		coin := args[2].(string)
-		client := args[3].(*gateapi.APIClient)
-		db := args[5].(*gorm.DB)
+		db := args[4].(*gorm.DB)
 
 		tradeDetail := database.TradeDetail{
 			Contract: coin,
@@ -42,16 +40,16 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		//}
 
 		// conditions no.2
-		k15mValues := interfaces.K(client, record.CointPair, -10, "15m")
+		k15mValues := interfaces.Market(record.CointPair, -10, "15m")
 		if k15mValues != nil {
-			k4mMacds := py.GetMacd(k15mValues, 12, 26, 9)
-			if len(k4mMacds) < 10 {
+			k15mMacds := py.GetMacd(k15mValues, 12, 26, 9)
+			if len(k15mMacds) < 10 {
 				return false
 			}
 
-			macdValue := utils.StringToFloat32(k4mMacds[len(k4mMacds)-1]["macd"])
-			if macdValue < 0 {
-				logrus.Info("Find sell point, then sell it : ", record.Contract, "Macd-Value", macdValue)
+			macd15mValue := utils.StringToFloat32(k15mMacds[len(k15mMacds)-1]["macd"])
+			if macd15mValue < 0 {
+				logrus.Info("Find sell point, then sell it : ", record.Contract, "Macd-Value", macd15mValue)
 				return true
 			}
 		}

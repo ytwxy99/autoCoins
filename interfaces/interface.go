@@ -1,17 +1,17 @@
 package interfaces
 
 import (
-	"github.com/gateio/gateapi-go/v6"
+	"strconv"
+
 	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/utils"
-	"strconv"
 )
 
 // get k market data
-func K(client *gateapi.APIClient, currencyPair string, beforeInterval int, interval string) [][]string {
+func Market(currencyPair string, beforeInterval int, interval string) [][]string {
 	from := utils.GetOldTimeStamp(0, 0, beforeInterval)
 	to := utils.GetNowTimeStamp()
-	values := c.GetSpotCandlesticks(client, currencyPair, from, to, interval)
+	values := c.GetSpotCandlesticks(currencyPair, from, to, interval)
 
 	if values != nil {
 		for _, v := range values {

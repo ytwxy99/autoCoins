@@ -16,7 +16,7 @@ func WriteLines(lines []string, filePath string) error {
 	wLock.Lock()
 	f, err := os.Create(filePath)
 	if err != nil {
-		logrus.Error("create map file error:", err)
+		logrus.Error("create map file error: %v", err)
 		return err
 	}
 	defer f.Close()

@@ -33,7 +33,7 @@ func ReadSystemConfig(filePath string) (*configuration.SystemConf, error) {
 	yamlFile, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
-		logrus.Error("ReadSystemConfig -> Get err:", err)
+		logrus.Error("ReadSystemConfig -> Get err: %v", err)
 		return nil, err
 	}
 	err = yaml.Unmarshal(yamlFile, &sysConf)
