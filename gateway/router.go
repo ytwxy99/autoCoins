@@ -1,12 +1,15 @@
 package gateway
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/ytwxy99/autoCoins/configuration"
 	"gorm.io/gorm"
+
+	"github.com/gateio/gateapi-go/v6"
+	"github.com/gin-gonic/gin"
+
+	"github.com/ytwxy99/autoCoins/configuration"
 )
 
-func Router(engine *gin.Engine, sysConf *configuration.SystemConf, db *gorm.DB) {
+func Router(client *gateapi.APIClient, engine *gin.Engine, sysConf *configuration.SystemConf, db *gorm.DB) {
 	engine.GET("/", func(context *gin.Context) {
 		ReadLog(context, sysConf.LogPath)
 	})
@@ -14,7 +17,7 @@ func Router(engine *gin.Engine, sysConf *configuration.SystemConf, db *gorm.DB) 
 		ReadSold(context, db)
 	})
 	engine.GET("/orders", func(context *gin.Context) {
-		ReadOrder(context, db)
+		ReadOrder(client, context, db)
 	})
 
 	// run gateway service

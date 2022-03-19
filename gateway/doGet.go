@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+
+	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/utils"
-	"gorm.io/gorm"
 )
 
 func ReadLog(context *gin.Context, filePath string) {
@@ -45,7 +48,7 @@ func ReadSold(context *gin.Context, db *gorm.DB) {
 	context.String(http.StatusOK, sums)
 }
 
-func ReadOrder(context *gin.Context, db *gorm.DB) {
+func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
 	var contents string
 	orders, err := database.GetAllOrder(db)
 	if err != nil {
@@ -53,9 +56,13 @@ func ReadOrder(context *gin.Context, db *gorm.DB) {
 	}
 
 	for _, order := range orders {
-		content := fmt.Sprintf("order detail: coin -> %s, price -> %s, time -> %s", order.Contract, order.Price, order.CreatedAt)
-		fmt.Println(content)
-		contents = contents + "\n" + content
+		currentCoin, err := c.GetCurrencyPair(client, order.Contract)
+		if err != nil {
+			context.String(http.StatusInternalServerError, "Get last price failed: ", err)
+		}
+		lastPrice := utils.StringToFloat32(currentCoin[0].Last)
+		priceDiff := (lastPrice - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price)
+		contents = contents + fmt.Sprintf("order detail: coin -> %s, price -> %s, time -> %s, priceDiff -> %s \n", order.Contract, order.Price, order.CreatedAt, priceDiff)
 	}
 
 	context.String(http.StatusOK, contents)

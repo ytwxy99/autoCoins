@@ -63,7 +63,7 @@ func InitCmd(client *gateapi.APIClient, ctx context.Context, sysConf *configurat
 		Short: "Start autoCoins gateway",
 		Run: func(cmd *cobra.Command, args []string) {
 			router := gin.Default()
-			gateway.Router(router, sysConf, db)
+			gateway.Router(client, router, sysConf, db)
 		},
 	}
 
