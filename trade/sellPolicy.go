@@ -19,7 +19,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		storedPrice := args[1].(float32)
 
 		return math.Abs(float64((lastPrice-storedPrice)/storedPrice)) >= 15
-	} else if policy == "cointegration" {
+	} else if policy == "cointegation" {
 		//lastPrice := args[0].(float32)
 		//storedPrice := args[1].(float32)
 		coin := args[2].(string)
