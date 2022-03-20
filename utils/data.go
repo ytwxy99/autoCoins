@@ -53,6 +53,17 @@ func StringToFloat32(s string) float32 {
 	return float32(f)
 }
 
+// string convert to float64
+func StringToFloat64(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logrus.Error("string convert to float32 error: %v", s)
+		return 0
+	}
+
+	return float64(f)
+}
+
 // float32 convert to string
 func Float32ToString(f float32) string {
 	return strconv.FormatFloat(float64(f), 'g', 10, 64)

@@ -10,6 +10,7 @@ import (
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/interfaces"
 	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/utils/index"
 )
 
 type Cointegration struct{}
@@ -46,7 +47,7 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 func macdJudge(coin string, interval int, level string) bool {
 	k4hValues := interfaces.Market(coin, interval, level)
 	if k4hValues != nil {
-		k4hMacds := GetMacd(k4hValues, 12, 26, 9)
+		k4hMacds := index.GetMacd(k4hValues, 12, 26, 9)
 		nowK4h := len(k4hMacds) - 1
 		if nowK4h < 5 {
 			return false

@@ -78,13 +78,13 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Using macd to do a trade",
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
+
 			for {
 				t := &trade.Trade{
 					Policy: "macd",
 				}
 				t.Entry(db, sysConf)
 			}
-
 		},
 	}
 

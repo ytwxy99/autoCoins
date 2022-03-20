@@ -8,8 +8,8 @@ import (
 
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/interfaces"
-	py "github.com/ytwxy99/autoCoins/policy"
 	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/utils/index"
 )
 
 func SellPolicy(policy string, args ...interface{}) bool {
@@ -42,7 +42,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		// conditions no.2
 		k15mValues := interfaces.Market(record.CointPair, -10, "15m")
 		if k15mValues != nil {
-			k15mMacds := py.GetMacd(k15mValues, 12, 26, 9)
+			k15mMacds := index.GetMacd(k15mValues, 12, 26, 9)
 			if len(k15mMacds) < 10 {
 				return false
 			}
