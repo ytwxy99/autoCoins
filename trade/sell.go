@@ -40,9 +40,14 @@ func SellPolicy(policy string, args ...interface{}) bool {
 		//}
 
 		// conditions no.2
-		k15mValues := interfaces.Market(record.CointPair, -10, "15m")
+		k15mValues := (&interfaces.MarketArgs{
+			CurrencyPair: record.CointPair,
+			Interval:     -10,
+			Level:        utils.Level15Min,
+		}).Market()
 		if k15mValues != nil {
-			k15mMacds := index.GetMacd(k15mValues, 12, 26, 9)
+			macdArgs := index.DefaultMacdArgs()
+			k15mMacds := macdArgs.GetMacd(k15mValues)
 			if len(k15mMacds) < 10 {
 				return false
 			}

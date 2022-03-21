@@ -7,13 +7,6 @@ import (
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
-const (
-	Five  = -4 // if you want to get 5 days market data, here should be typed -4
-	Six   = -5
-	Seven = -6
-	Ten   = -9
-)
-
 type Average struct {
 	CurrencyPair string
 	Intervel     int
@@ -28,7 +21,12 @@ type Average struct {
 func (average *Average) FiveAverage(backOff bool) float64 {
 	if !backOff {
 		var sum float64
-		markets := interfaces.Market(average.CurrencyPair, average.Intervel, average.Level)
+		markets := (&interfaces.MarketArgs{
+			CurrencyPair: average.CurrencyPair,
+			Interval:     average.Intervel,
+			Level:        average.Level,
+		}).Market()
+
 		for _, market := range markets {
 			sum += utils.StringToFloat64(market[2])
 		}
@@ -36,7 +34,12 @@ func (average *Average) FiveAverage(backOff bool) float64 {
 		return sum / (math.Abs(float64(average.Intervel)) + 1)
 	} else {
 		var sum float64
-		markets := interfaces.Market(average.CurrencyPair, average.Intervel-1, average.Level)
+		markets := (&interfaces.MarketArgs{
+			CurrencyPair: average.CurrencyPair,
+			Interval:     average.Intervel - 1,
+			Level:        average.Level,
+		}).Market()
+
 		for index, market := range markets {
 			if index == -(average.Intervel - 1) {
 				continue

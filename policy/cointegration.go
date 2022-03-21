@@ -43,11 +43,11 @@ func removeDuplicate(coints []database.Cointegration) []database.Cointegration {
 	return newCoints
 }
 
-// MACD condition judge
-func macdJudge(coin string, interval int, level string) bool {
-	k4hValues := interfaces.Market(coin, interval, level)
+func macdJudge(marketArgs *interfaces.MarketArgs) bool {
+	k4hValues := marketArgs.Market()
 	if k4hValues != nil {
-		k4hMacds := index.GetMacd(k4hValues, 12, 26, 9)
+		macdArgs := index.DefaultMacdArgs()
+		k4hMacds := macdArgs.GetMacd(k4hValues)
 		nowK4h := len(k4hMacds) - 1
 		if nowK4h < 5 {
 			return false
@@ -103,8 +103,17 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			continue
 		}
 
-		k0 := interfaces.Market(pairs[0], -3, "1d")
-		k1 := interfaces.Market(pairs[1], -3, "1d")
+		k0 := (&interfaces.MarketArgs{
+			CurrencyPair: pairs[0],
+			Interval:     -3,
+			Level:        utils.Level1Day,
+		}).Market()
+		k1 := (&interfaces.MarketArgs{
+			CurrencyPair: pairs[1],
+			Interval:     -3,
+			Level:        utils.Level1Day,
+		}).Market()
+
 		if k0 == nil || k1 == nil {
 			// get k data failed
 			continue
@@ -141,7 +150,18 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 			//TODO(wangxiaoyu), need to optimize buying points.
 			paris := strings.Split(k, "-")
 			if priceDiff[paris[0]] > priceDiff[paris[1]] {
-				if macdJudge(paris[1], -100, "4h") && macdJudge(paris[1], -10, "15m") {
+				marketArgs4h := &interfaces.MarketArgs{
+					CurrencyPair: paris[1],
+					Interval:     -100,
+					Level:        utils.Level4Hour,
+				}
+				marketArgs15m := &interfaces.MarketArgs{
+					CurrencyPair: paris[0],
+					Interval:     -10,
+					Level:        utils.Level15Min,
+				}
+
+				if macdJudge(marketArgs4h) && macdJudge(marketArgs15m) {
 					if tradeJugde(paris[1], db) {
 						tradeDetail := database.TradeDetail{
 							Contract:  paris[1],
@@ -158,7 +178,18 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 					}
 				}
 			} else {
-				if macdJudge(paris[0], -100, "4h") && macdJudge(paris[1], -10, "15m") {
+				marketArgs4h := &interfaces.MarketArgs{
+					CurrencyPair: paris[0],
+					Interval:     -100,
+					Level:        utils.Level4Hour,
+				}
+				marketArgs15m := &interfaces.MarketArgs{
+					CurrencyPair: paris[1],
+					Interval:     -10,
+					Level:        utils.Level15Min,
+				}
+
+				if macdJudge(marketArgs4h) && macdJudge(marketArgs15m) {
 					if tradeJugde(paris[0], db) {
 						tradeDetail := database.TradeDetail{
 							Contract:  paris[0],

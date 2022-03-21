@@ -7,11 +7,17 @@ import (
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
-// get k market data
-func Market(currencyPair string, beforeInterval int, interval string) [][]string {
-	from := utils.GetOldTimeStamp(0, 0, beforeInterval)
+type MarketArgs struct {
+	CurrencyPair string
+	Interval     int
+	Level        string
+}
+
+// get market data
+func (marketArgs *MarketArgs) Market() [][]string {
+	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
-	values := c.GetSpotCandlesticks(currencyPair, from, to, interval)
+	values := c.GetSpotCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
 
 	if values != nil {
 		for _, v := range values {

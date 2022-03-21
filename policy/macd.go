@@ -13,11 +13,21 @@ func (*MacdPolicy) Target(args ...interface{}) interface{} {
 	// convert specified type
 	coin := args[0].(string)
 
-	k4hValues := interfaces.Market(coin, -100, "4h")
-	k15mValues := interfaces.Market(coin, -1, "15m")
+	k4hValues := (&interfaces.MarketArgs{
+		CurrencyPair: coin,
+		Interval:     -100,
+		Level:        utils.Level4Hour,
+	}).Market()
+	k15mValues := (&interfaces.MarketArgs{
+		CurrencyPair: coin,
+		Interval:     -1,
+		Level:        utils.Level15Min,
+	}).Market()
+
 	if k4hValues != nil && k15mValues != nil {
-		k4hMacds := index.GetMacd(k4hValues, 12, 26, 9)
-		k15mMacds := index.GetMacd(k15mValues, 12, 26, 9)
+		macdArgs := index.DefaultMacdArgs()
+		k4hMacds := macdArgs.GetMacd(k4hValues)
+		k15mMacds := macdArgs.GetMacd(k15mValues)
 		// fetch now local time macd data
 		nowK4h := len(k4hMacds) - 1
 		nowK15m := len(k15mMacds) - 1

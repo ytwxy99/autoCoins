@@ -2,8 +2,13 @@ package index
 
 import "github.com/ytwxy99/autoCoins/utils"
 
-// get macd data
-func GetMacd(values [][]string, short int, long int, M int) []map[string]string {
+type MacdArgs struct {
+	Short int
+	Long  int
+	M     int
+}
+
+func (macdArgs *MacdArgs) GetMacd(values [][]string) []map[string]string {
 	var ks []map[string]string
 	for _, value := range values {
 		m := make(map[string]string)
@@ -16,11 +21,11 @@ func GetMacd(values [][]string, short int, long int, M int) []map[string]string 
 		ks = append(ks, m)
 	}
 
-	emas := calcEma(ks, short)
-	emaq := calcEma(ks, long)
+	eMas := calcEma(ks, macdArgs.Short)
+	eMaq := calcEma(ks, macdArgs.Long)
 
 	for index, k := range ks {
-		k["diff"] = utils.Float32ToString(emas[index] - emaq[index])
+		k["diff"] = utils.Float32ToString(eMas[index] - eMaq[index])
 	}
 
 	for index, k := range ks {
@@ -29,7 +34,7 @@ func GetMacd(values [][]string, short int, long int, M int) []map[string]string 
 		} else {
 			dea := utils.StringToFloat32(ks[index-1]["dea"])
 			diff := utils.StringToFloat32(k["diff"])
-			deaIndex := (float32(M-1)*dea + 2*diff) / float32(M+1)
+			deaIndex := (float32(macdArgs.M-1)*dea + 2*diff) / float32(macdArgs.M+1)
 			k["dea"] = utils.Float32ToString(deaIndex)
 		}
 	}
@@ -63,4 +68,12 @@ func calcEma(values []map[string]string, num int) []float32 {
 	}
 
 	return emaAll
+}
+
+func DefaultMacdArgs() *MacdArgs {
+	return &MacdArgs{
+		Short: 12,
+		Long:  26,
+		M:     9,
+	}
 }
