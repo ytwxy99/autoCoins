@@ -12,7 +12,7 @@ import (
 var target policy.Policy
 
 // find macd buy point target
-func FindMacdTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
+func FindTrendTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
 	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {

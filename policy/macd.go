@@ -59,6 +59,7 @@ func (c *condition) buyCondition() bool {
 
 	// judgment depends on price
 	conditionF := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 1.1)
+	conditionG := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Open], 0, 1.1)
 
 	// judgment depends on price average data
 	averageArgs := index.Average{
@@ -66,9 +67,13 @@ func (c *condition) buyCondition() bool {
 		Intervel:     utils.Five,
 		Level:        utils.Level15Min,
 	}
-	conditionG := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(false)
+	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(false)
 
-	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG
+	// judgment depends on volume
+	conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], 0, 1.2)
+	conditionJ := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.2)
+
+	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG && conditionH && conditionI && conditionJ
 }
 
 // if compareA is larger than compareB, then return true

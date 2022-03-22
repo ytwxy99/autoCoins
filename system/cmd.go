@@ -72,16 +72,16 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Args:  cobra.MinimumNArgs(1),
 	}
 
-	// use macd policy
-	var macdCmd = &cobra.Command{
-		Use:   "macd [string to echo]",
-		Short: "Using macd to do a trade",
+	// use trend policy
+	var trendCmd = &cobra.Command{
+		Use:   "trend [string to echo]",
+		Short: "Using trend to do a trade",
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
 
 			for {
 				t := &trade.Trade{
-					Policy: "macd",
+					Policy: "trend",
 				}
 				t.Entry(db, sysConf)
 			}
@@ -105,7 +105,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	rootCmd.AddCommand(InitCmd)
 	rootCmd.AddCommand(GateWayCmd)
 	rootCmd.AddCommand(tradeCmd)
-	tradeCmd.AddCommand(macdCmd)
+	tradeCmd.AddCommand(trendCmd)
 	tradeCmd.AddCommand(cointegrationCmd)
 	rootCmd.Execute()
 }

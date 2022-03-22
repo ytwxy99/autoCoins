@@ -28,7 +28,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 		http.ListenAndServe("localhost:6060", nil)
 	}()
 
-	if t.Policy == "macd" {
+	if t.Policy == "trend" {
 		coins, err := utils.ReadLines(sysConf.CoinCsv)
 		if err != nil {
 			logrus.Error("Read local file error: %v", err)
@@ -37,9 +37,9 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 
 		for i := 0; i < (len(coins)/10 + 1); i++ {
 			if i == len(coins)/10 {
-				go FindMacdTarget(db, coins[i*10:i*10+len(coins)%10], buyCoins)
+				go FindTrendTarget(db, coins[i*10:i*10+len(coins)%10], buyCoins)
 			} else {
-				go FindMacdTarget(db, coins[i*10:i*10+9], buyCoins)
+				go FindTrendTarget(db, coins[i*10:i*10+9], buyCoins)
 			}
 		}
 
@@ -54,7 +54,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 				c, err := order.FetchOneOrder(db)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(db, sysConf, coin, "up", "macd", SellPolicy)
+					go DoTrade(db, sysConf, coin, "up", "trend", SellPolicy)
 				}
 			}
 		}
