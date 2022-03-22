@@ -90,5 +90,5 @@ func compare(compareA string, compareB string, weightA float32, weightB float32)
 		compareBf = compareBf * weightB
 	}
 
-	return compareAf > weightB
+	return compareAf > compareBf
 }
