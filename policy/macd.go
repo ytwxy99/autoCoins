@@ -55,22 +55,22 @@ func (c *condition) buyCondition() bool {
 	// judgment depends on 4h macd
 	conditionC := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                    //当下4h的macd大于0
 	conditionD := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                  //当下15m的macd大于0
-	conditionE := compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是整长的
+	conditionE := compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
 
 	// judgment depends on price
-	conditionF := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 1.1)
-	conditionG := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Open], 0, 1.1)
+	conditionF := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 1.1) //当前价格涨幅超过10%
+	conditionG := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Open], 0, 1.1) //上一个4h价格涨幅超过10%
 
 	// judgment depends on price average data
 	averageArgs := index.Average{
 		CurrencyPair: c.coin,
 		Intervel:     utils.Five,
-		Level:        utils.Level15Min,
+		Level:        utils.Level4Hour,
 	}
-	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(false)
+	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(true) //4h的FiveAverage是增长的
 
 	// judgment depends on volume
-	conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], 0, 1.2)
+	conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], 0, 1.2) //volme 增长20%
 	conditionJ := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.2)
 
 	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG && conditionH && conditionI && conditionJ
