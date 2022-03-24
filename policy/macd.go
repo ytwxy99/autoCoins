@@ -70,10 +70,9 @@ func (c *condition) buyCondition() bool {
 	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(true) //4h的FiveAverage是增长的
 
 	// judgment depends on volume
-	conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], 0, 1.2) //volme 增长20%
-	conditionJ := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.2)
+	conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.1) //volme 增长20%
 
-	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG && conditionH && conditionI && conditionJ
+	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG && conditionH && conditionI
 }
 
 // if compareA is larger than compareB, then return true
