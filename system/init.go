@@ -27,6 +27,11 @@ func InitCurrencyPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.D
 				Interval:     -999,
 				Level:        utils.Level1Day,
 			}).Market()
+
+			if len(values) < 900 {
+				continue
+			}
+
 			for _, value := range values {
 				timeTrans, err := time.ParseInLocation("2006-01-02 08:00:00", value[0], time.Local)
 				if err != nil {

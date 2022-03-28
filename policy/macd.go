@@ -49,17 +49,17 @@ func (*MacdPolicy) Target(args ...interface{}) interface{} {
 
 func (c *condition) buyCondition() bool {
 	// judgment depends on 4h price
-	conditionA := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 0)    //当下4h是具有涨幅的
-	conditionB := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], 0, 1.1) //上个4h是涨幅十个点以上的
+	conditionA := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 0)    //当下4h是具有涨幅的
+	conditionB := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], 0, 1.1) //上个4h是涨幅十个点以上的
 
 	// judgment depends on 4h macd
-	conditionC := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                    //当下4h的macd大于0
-	conditionD := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                  //当下15m的macd大于0
-	conditionE := compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
+	conditionC := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                          //当下4h的macd大于0
+	conditionD := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                        //当下15m的macd大于0
+	conditionE := utils.Compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
 
 	// judgment depends on price
-	conditionF := compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 1.1) //当前价格涨幅超过10%
-	conditionG := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Open], 0, 1.1) //上一个4h价格涨幅超过10%
+	conditionF := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 1.1) //当前价格涨幅超过10%
+	conditionG := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-2][utils.Open], 0, 1.1) //上一个4h价格涨幅超过10%
 
 	// judgment depends on price average data
 	averageArgs := index.Average{
@@ -73,21 +73,4 @@ func (c *condition) buyCondition() bool {
 	//conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.1) //volme 增长10%
 
 	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF && conditionG && conditionH
-}
-
-// if compareA is larger than compareB, then return true
-func compare(compareA string, compareB string, weightA float32, weightB float32) bool {
-	// string to float32
-	compareAf := utils.StringToFloat32(compareA)
-	compareBf := utils.StringToFloat32(compareB)
-
-	if weightA != 0 {
-		compareAf = compareAf * weightA
-	}
-
-	if weightB != 0 {
-		compareBf = compareBf * weightB
-	}
-
-	return compareAf > compareBf
 }

@@ -48,7 +48,8 @@ func FindTrendTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
 // find buy point target by doing cointegration
 func DoCointegration(db *gorm.DB, buyCoins chan<- string) {
 	target = &policy.Cointegration{}
-	for {
+	i := 0
+	for i < 1 {
 		coins := target.Target(db).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
@@ -76,5 +77,4 @@ func DoCointegration(db *gorm.DB, buyCoins chan<- string) {
 			}
 		}
 	}
-
 }

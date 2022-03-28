@@ -12,4 +12,5 @@ const (
 	Open             = "o"
 	Volume           = "v"
 	DBHistoryDayUniq = "UNIQUE constraint failed: history_day.contract, history_day.time"
+	IndexCoin        = "BTC_USDT"
 )
