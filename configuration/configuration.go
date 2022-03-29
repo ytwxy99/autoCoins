@@ -28,11 +28,11 @@ var (
 
 // system configuration
 type SystemConf struct {
-	CoinCsv string `yaml:"CoinCsv"`
+	CoinCsv             string `yaml:"CoinCsv"`
 	CointegrationSrcipt string `yaml:"CointegrationSrcipt"`
-	LogPath string `yaml:"LogPath"`
-	DBPath  string `yaml:"DBPath"`
-	Options struct {
+	LogPath             string `yaml:"LogPath"`
+	DBPath              string `yaml:"DBPath"`
+	Options             struct {
 		Quantity  float32 `yaml:"quantity"`
 		Pairing   string  `yaml:"pairing"`
 		Test      bool    `yaml:"test"`
@@ -41,6 +41,13 @@ type SystemConf struct {
 		EnableTsl bool    `yaml:"enable_tsl"`
 		Tsl       float32 `yaml:"tsl"`
 		Ttp       float32 `yaml:"ttp"`
+	}
+	Email struct {
+		User     string   `yaml:"user"`
+		Password string   `yaml:"password"`
+		Host     string   `yaml:"host"`
+		Port     string   `yaml:"port"`
+		MailTo   []string `yaml:"mailTo"`
 	}
 }
 

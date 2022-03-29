@@ -5,14 +5,16 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/policy"
+	"github.com/ytwxy99/autoCoins/utils"
 )
 
 var target policy.Policy
 
 // find macd buy point target
-func FindTrendTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
+func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []string, buyCoins chan<- string) {
 	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {
@@ -38,6 +40,10 @@ func FindTrendTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
+					err = utils.SendMail(sysConf, "趋势策略", "关注币种: "+coin)
+					if err != nil {
+						logrus.Error("Send email failed. the err is ", err)
+					}
 				}
 			}
 		}
@@ -46,7 +52,7 @@ func FindTrendTarget(db *gorm.DB, coins []string, buyCoins chan<- string) {
 }
 
 // find buy point target by doing cointegration
-func DoCointegration(db *gorm.DB, buyCoins chan<- string) {
+func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- string) {
 	target = &policy.Cointegration{}
 	i := 0
 	for i < 1 {
@@ -73,6 +79,10 @@ func DoCointegration(db *gorm.DB, buyCoins chan<- string) {
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
+					err = utils.SendMail(sysConf, "BTC单边协整性策略", "关注币种: "+coin)
+					if err != nil {
+						logrus.Error("Send email failed. the err is ", err)
+					}
 				}
 			}
 		}

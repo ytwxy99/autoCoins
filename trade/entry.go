@@ -37,9 +37,9 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 
 		for i := 0; i < (len(coins)/10 + 1); i++ {
 			if i == len(coins)/10 {
-				go FindTrendTarget(db, coins[i*10:i*10+len(coins)%10], buyCoins)
+				go FindTrendTarget(db, sysConf, coins[i*10:i*10+len(coins)%10], buyCoins)
 			} else {
-				go FindTrendTarget(db, coins[i*10:i*10+9], buyCoins)
+				go FindTrendTarget(db, sysConf, coins[i*10:i*10+9], buyCoins)
 			}
 		}
 
@@ -61,7 +61,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 
 	} else if t.Policy == "cointegration" {
 		var buyCoins = make(chan string, 2)
-		go DoCointegration(db, buyCoins)
+		go DoCointegration(db, sysConf, buyCoins)
 
 		for {
 			select {
