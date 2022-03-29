@@ -51,11 +51,13 @@ func (c *condition) buyCondition() bool {
 	// judgment depends on 4h price
 	conditionA := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 0)    //当下4h是具有涨幅的
 	conditionB := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], 0, 1.1) //上个4h是涨幅十个点以上的
+	conditionC := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-4][utils.Close], 0, 1.05)
 
 	// judgment depends on 4h macd
-	conditionC := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                          //当下4h的macd大于0
-	conditionD := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                        //当下15m的macd大于0
-	conditionE := utils.Compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
+	conditionD := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                          //当下4h的macd大于0
+	conditionE := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-2]["macd"]) > 0                                          //上个4h的macd大于0
+	conditionF := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                        //当下15m的macd大于0
+	conditionG := utils.Compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
 
 	// judgment depends on price average data
 	averageArgs := index.Average{
@@ -63,10 +65,10 @@ func (c *condition) buyCondition() bool {
 		Intervel:     utils.Five,
 		Level:        utils.Level4Hour,
 	}
-	conditionF := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(true) //4h的FiveAverage是增长的
+	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(true) //4h的FiveAverage是增长的
 
 	//// judgment depends on volume
 	//conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.1) //volme 增长10%
 
-	return conditionA && conditionB && conditionC && conditionD && conditionE && conditionF
+	return conditionA && conditionB && !conditionC && conditionD && conditionE && conditionF && conditionG && conditionH
 }
