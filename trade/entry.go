@@ -29,7 +29,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 	}()
 
 	if t.Policy == "trend" {
-		coins, err := utils.ReadLines(sysConf.CoinCsv)
+		coins, err := utils.ReadLines(sysConf.CointCsv)
 		if err != nil {
 			logrus.Error("Read local file error: %v", err)
 			return

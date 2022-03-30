@@ -31,13 +31,19 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 						logrus.Error("get sport all coins error: %v\n", err)
 					}
 
-					err = InitCurrencyPairs(result, sysConf.CoinCsv, db)
+					err = InitTrendPairs(result, sysConf.TrendCsv, db)
 					if err != nil {
 						initErr <- err
 					}
+
+					err = InitCointegrationPairs(result, sysConf.CointCsv, db)
+					if err != nil {
+						initErr <- err
+					}
+
 					logrus.Info("update sport all coins into csv finished!")
 
-					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CoinCsv)
+					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CointCsv)
 					if err != nil {
 						initErr <- err
 					}

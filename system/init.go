@@ -15,8 +15,7 @@ import (
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
-// get all usdt pair coins and write into file
-func InitCurrencyPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
+func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
 	var historyDay *database.HistoryDay
 	coins := []string{}
 	for _, pair := range pairs {
@@ -24,7 +23,52 @@ func InitCurrencyPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.D
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
 			values := (&interfaces.MarketArgs{
 				CurrencyPair: pair.Id,
-				Interval:     -600,
+				Interval:     -300,
+				Level:        utils.Level1Day,
+			}).Market()
+
+			if len(values) < 300 {
+				continue
+			}
+
+			for _, value := range values {
+				timeTrans, err := time.ParseInLocation("2006-01-02 08:00:00", value[0], time.Local)
+				if err != nil {
+					logrus.Error("get time type from string error: %v\n", err)
+				}
+
+				historyDay = &database.HistoryDay{
+					Contract: pair.Id,
+					Time:     timeTrans,
+					Price:    value[2],
+				}
+
+				err = historyDay.AddHistoryDay(db)
+				if err != nil {
+					if err.Error() != utils.DBHistoryDayUniq {
+						logrus.Error("add HistoryDay record error: %v\n", err)
+					}
+				}
+			}
+
+			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 100000.0 {
+				coins = append(coins, pair.Id)
+			}
+		}
+	}
+
+	return utils.WriteLines(coins, filePath)
+}
+
+func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
+	var historyDay *database.HistoryDay
+	coins := []string{}
+	for _, pair := range pairs {
+		// just record coin which is tradable
+		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
+			values := (&interfaces.MarketArgs{
+				CurrencyPair: pair.Id,
+				Interval:     -900,
 				Level:        utils.Level1Day,
 			}).Market()
 
@@ -52,7 +96,7 @@ func InitCurrencyPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.D
 				}
 			}
 
-			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 200000.0 {
+			if len(values) != 0 {
 				coins = append(coins, pair.Id)
 			}
 		}
