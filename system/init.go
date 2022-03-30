@@ -24,7 +24,7 @@ func InitCurrencyPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.D
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
 			values := (&interfaces.MarketArgs{
 				CurrencyPair: pair.Id,
-				Interval:     -999,
+				Interval:     -600,
 				Level:        utils.Level1Day,
 			}).Market()
 
