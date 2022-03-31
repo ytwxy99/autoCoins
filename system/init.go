@@ -23,11 +23,11 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
 			values := (&interfaces.MarketArgs{
 				CurrencyPair: pair.Id,
-				Interval:     -300,
+				Interval:     -150,
 				Level:        utils.Level1Day,
 			}).Market()
 
-			if len(values) < 300 {
+			if len(values) < 150 {
 				continue
 			}
 
@@ -51,7 +51,7 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 				}
 			}
 
-			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 100000.0 {
+			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 50000.0 {
 				coins = append(coins, pair.Id)
 			}
 		}
