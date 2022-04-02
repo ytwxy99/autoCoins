@@ -44,7 +44,7 @@ func SellPolicy(policy string, args ...interface{}) bool {
 			CurrencyPair: record.CointPair,
 			Interval:     -10,
 			Level:        utils.Level15Min,
-		}).Market()
+		}).SpotMarket()
 		if k15mValues != nil {
 			macdArgs := index.DefaultMacdArgs()
 			k15mMacds := macdArgs.GetMacd(k15mValues)

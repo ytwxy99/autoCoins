@@ -25,7 +25,7 @@ func (average *Average) FiveAverage(backOff bool) float64 {
 			CurrencyPair: average.CurrencyPair,
 			Interval:     average.Intervel,
 			Level:        average.Level,
-		}).Market()
+		}).SpotMarket()
 
 		for _, market := range markets {
 			sum += utils.StringToFloat64(market[2])
@@ -38,7 +38,7 @@ func (average *Average) FiveAverage(backOff bool) float64 {
 			CurrencyPair: average.CurrencyPair,
 			Interval:     average.Intervel - 1,
 			Level:        average.Level,
-		}).Market()
+		}).SpotMarket()
 
 		for index, market := range markets {
 			if index == -(average.Intervel - 1) {

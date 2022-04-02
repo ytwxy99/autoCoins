@@ -1,7 +1,10 @@
 package interfaces
 
 import (
+	"context"
 	"strconv"
+
+	"github.com/gateio/gateapi-go/v6"
 
 	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/utils"
@@ -13,8 +16,11 @@ type MarketArgs struct {
 	Level        string
 }
 
-// get market data
-func (marketArgs *MarketArgs) Market() [][]string {
+type Future struct {
+	Settle string
+}
+
+func (marketArgs *MarketArgs) SpotMarket() [][]string {
 	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
 	values := c.GetSpotCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
@@ -29,4 +35,25 @@ func (marketArgs *MarketArgs) Market() [][]string {
 	} else {
 		return nil
 	}
+}
+
+func (marketArgs *MarketArgs) FutureMarket() []gateapi.FuturesCandlestick {
+	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
+	to := utils.GetNowTimeStamp()
+	futures := c.GetFutureCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
+
+	if futures != nil {
+		return futures
+	} else {
+		return nil
+	}
+}
+
+func (future *Future) GetAllFutures(ctx context.Context) ([]gateapi.Contract, error) {
+	contracts, _, err := c.Client.FuturesApi.ListFuturesContracts(ctx, future.Settle)
+	if err != nil {
+		return nil, err
+	}
+
+	return contracts, err
 }

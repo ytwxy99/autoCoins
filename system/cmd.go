@@ -26,9 +26,14 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 			go func() {
 				for {
 					logrus.Info("Initialize trading system ……")
+					err := InitFutures(ctx, sysConf.UmbrellaCsv)
+					if err != nil {
+						logrus.Error("get all futures error: %v\n", err)
+					}
+
 					result, err := c.GetSpotAllCoins(ctx)
 					if err != nil {
-						logrus.Error("get sport all coins error: %v\n", err)
+						logrus.Error("get all spot coins error: %v\n", err)
 					}
 
 					err = InitTrendPairs(result, sysConf.TrendCsv, db)
@@ -41,7 +46,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 						initErr <- err
 					}
 
-					logrus.Info("update sport all coins into csv finished!")
+					logrus.Info("update all spot coins into csv finished!")
 
 					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CointCsv)
 					if err != nil {
@@ -68,7 +73,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Start autoCoins gateway",
 		Run: func(cmd *cobra.Command, args []string) {
 			router := gin.Default()
-			gateway.Router(c.SpotClient, router, sysConf, db)
+			gateway.Router(c.Client, router, sysConf, db)
 		},
 	}
 
@@ -107,11 +112,25 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		},
 	}
 
+	// use cointegration policy
+	var umbrellaCmd = &cobra.Command{
+		Use:   "umbrella [string to echo]",
+		Short: "Using umbrella to do a trade",
+		Run: func(cmd *cobra.Command, args []string) {
+			logrus.Info("Find the umbrella in the sea ！ get it !")
+			t := &trade.Trade{
+				Policy: "umbrella",
+			}
+			t.Entry(db, sysConf)
+		},
+	}
+
 	var rootCmd = &cobra.Command{Use: "autoCoin"}
 	rootCmd.AddCommand(InitCmd)
 	rootCmd.AddCommand(GateWayCmd)
 	rootCmd.AddCommand(tradeCmd)
 	tradeCmd.AddCommand(trendCmd)
 	tradeCmd.AddCommand(cointegrationCmd)
+	tradeCmd.AddCommand(umbrellaCmd)
 	rootCmd.Execute()
 }

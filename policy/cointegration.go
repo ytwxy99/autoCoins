@@ -25,7 +25,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		CurrencyPair: utils.IndexCoin,
 		Interval:     -1,
 		Level:        utils.Level4Hour,
-	}).Market()
+	}).SpotMarket()
 
 	diffBtc1 := utils.Compare(btcMarket[len(btcMarket)-1][2], btcMarket[len(btcMarket)-2][2], 0, 1.05)
 	diffBtc2 := utils.Compare(btcMarket[len(btcMarket)-3][2], btcMarket[len(btcMarket)-3][2], 0, 1.01)
@@ -55,7 +55,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 					CurrencyPair: p,
 					Interval:     -1,
 					Level:        utils.Level4Hour,
-				}).Market()
+				}).SpotMarket()
 
 				diffSubCoin1 := utils.Compare(btcMarket[len(btcMarket)-1][2], btcMarket[len(btcMarket)-2][2], 0, 1.05)
 				diffSubCoin2 := utils.Compare(btcMarket[len(btcMarket)-3][2], btcMarket[len(btcMarket)-3][2], 0, 1.05)
@@ -74,7 +74,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 }
 
 func macdJudge(marketArgs *interfaces.MarketArgs) bool {
-	k4hValues := marketArgs.Market()
+	k4hValues := marketArgs.SpotMarket()
 	if k4hValues != nil {
 		macdArgs := index.DefaultMacdArgs()
 		k4hMacds := macdArgs.GetMacd(k4hValues)

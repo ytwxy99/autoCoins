@@ -22,12 +22,12 @@ func (*MacdPolicy) Target(args ...interface{}) interface{} {
 		CurrencyPair: coin,
 		Interval:     -100,
 		Level:        utils.Level4Hour,
-	}).Market()
+	}).SpotMarket()
 	market15M := (&interfaces.MarketArgs{
 		CurrencyPair: coin,
 		Interval:     -1,
 		Level:        utils.Level15Min,
-	}).Market()
+	}).SpotMarket()
 
 	if market4H != nil && market15M != nil {
 		macdArgs := index.DefaultMacdArgs()

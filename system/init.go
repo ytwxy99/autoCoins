@@ -1,12 +1,13 @@
 package system
 
 import (
-	"gorm.io/gorm"
+	"context"
 	"os/exec"
 	"time"
 
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
@@ -25,7 +26,7 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 				CurrencyPair: pair.Id,
 				Interval:     -150,
 				Level:        utils.Level1Day,
-			}).Market()
+			}).SpotMarket()
 
 			if len(values) < 150 {
 				continue
@@ -70,7 +71,7 @@ func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *g
 				CurrencyPair: pair.Id,
 				Interval:     -900,
 				Level:        utils.Level1Day,
-			}).Market()
+			}).SpotMarket()
 
 			if len(values) < 900 {
 				continue
@@ -116,9 +117,25 @@ func InitCointegration(dbPath string, scriptPath string, coinCsv string) error {
 	return nil
 }
 
+func InitFutures(ctx context.Context, coinCsv string) error {
+	coins := []string{}
+	futures, err := (&interfaces.Future{
+		Settle: client.Settle,
+	}).GetAllFutures(ctx)
+	if err != nil {
+		logrus.Error("get all futures failed.", err)
+	}
+
+	for _, future := range futures {
+		coins = append(coins, future.Name)
+	}
+
+	return utils.WriteLines(coins, coinCsv)
+}
+
 // init system base data
 func Init(authConf *configuration.GateAPIV4, sysConf *configuration.SystemConf) {
-	_, ctx := client.GetSpotClient(authConf)
+	_, ctx := client.GetClient(authConf)
 	utils.InitLog(sysConf.LogPath)
 	db := database.GetDB(sysConf)
 	database.InitDB(db)
