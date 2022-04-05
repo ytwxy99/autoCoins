@@ -41,14 +41,15 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 						initErr <- err
 					}
 
-					err = InitCointegrationPairs(result, sysConf.CointCsv, db)
+					// use futures to statistics cointegration
+					err = InitCointegrationPairs(result, sysConf.UmbrellaCsv, db)
 					if err != nil {
 						initErr <- err
 					}
 
 					logrus.Info("update all spot coins into csv finished!")
 
-					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.CointCsv)
+					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.UmbrellaCsv)
 					if err != nil {
 						initErr <- err
 					}

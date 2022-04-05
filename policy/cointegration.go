@@ -1,12 +1,14 @@
 package policy
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/interfaces"
 	"github.com/ytwxy99/autoCoins/utils"
@@ -18,57 +20,56 @@ type Cointegration struct{}
 // cointegration policy
 func (*Cointegration) Target(args ...interface{}) interface{} {
 	db := args[0].(*gorm.DB)
+	sysConf := args[1].(*configuration.SystemConf)
+
+	//futures, err := utils.ReadLines(sysConf.UmbrellaCsv)
 	buyCoins := []string{}
 	sortCoins := map[string]float32{}
 
-	btcMarket := (&interfaces.MarketArgs{
-		CurrencyPair: utils.IndexCoin,
-		Interval:     -1,
-		Level:        utils.Level4Hour,
-	}).SpotMarket()
+	// fetch all weight coins for judging btc
+	weights, err := utils.ReadLines(sysConf.WeightCsv)
+	fmt.Println(weights)
+	if err != nil {
+		logrus.Error("read weight csv failed, err is ", err)
+	}
 
-	diffBtc1 := utils.Compare(btcMarket[len(btcMarket)-1][2], btcMarket[len(btcMarket)-2][2], 0, 1.05)
-	diffBtc2 := utils.Compare(btcMarket[len(btcMarket)-3][2], btcMarket[len(btcMarket)-3][2], 0, 1.01)
+	coints, err := database.GetAllCoint(db)
+	if err != nil || len(coints) == 0 {
+		logrus.Error("get cointegration from database error: ", err)
+	}
 
-	if diffBtc1 && !diffBtc2 {
-		// 当前4个小时涨幅5%，且上个4个小时涨幅小于1%
-		coints, err := database.GetAllCoint(db)
-		if err != nil || len(coints) == 0 {
-			logrus.Error("get cointegration from database error: %v", err)
+	for _, coint := range coints {
+		if containsBtc := strings.Contains(coint.Pair, utils.IndexCoin); containsBtc {
+			sortCoins[coint.Pair] = utils.StringToFloat32(coint.Pvalue)
 		}
+	}
 
-		for _, coint := range coints {
-			if containsBtc := strings.Contains(coint.Pair, utils.IndexCoin); containsBtc {
-				sortCoins[coint.Pair] = utils.StringToFloat32(coint.Pvalue)
-			}
-		}
-
-		cSorts := (&cSort{}).sortCoints(sortCoins)
+	cSorts := (&cSort{}).sortCoints(sortCoins)
+	for i, weight := range weights {
+		cointFlag := false
 		for _, cSort := range cSorts {
-			pairs := strings.Split(cSort.Pair, "-")
-			for _, p := range pairs {
-				if utils.IndexCoin == p {
-					continue
-				}
-
-				btcMarket := (&interfaces.MarketArgs{
-					CurrencyPair: p,
-					Interval:     -1,
-					Level:        utils.Level4Hour,
-				}).SpotMarket()
-
-				diffSubCoin1 := utils.Compare(btcMarket[len(btcMarket)-1][2], btcMarket[len(btcMarket)-2][2], 0, 1.05)
-				diffSubCoin2 := utils.Compare(btcMarket[len(btcMarket)-3][2], btcMarket[len(btcMarket)-3][2], 0, 1.05)
-
-				if !diffSubCoin1 && !diffSubCoin2 {
-					if tradeJugde(p, db) {
-						buyCoins = append(buyCoins, p)
-						logrus.Info("Find cointegration policy desired coin: %v", p)
+			for _, coin := range strings.Split(cSort.Pair, "-") {
+				if coin == utils.IndexCoin {
+					if strings.Contains(cSort.Pair, weight) {
+						cointFlag = true
 					}
 				}
 			}
 		}
+
+		if !cointFlag {
+			weights = append(weights[:i], weights[i+1:]...)
+			logrus.Error("There is no correlation with BTC, the coin is ", weight)
+		}
 	}
+
+	//TODO(wangxiaoyu), do right things for weight and btc.
+
+	//btcMarket := (&interfaces.MarketArgs{
+	//	CurrencyPair: utils.IndexCoin,
+	//	Interval:     -1,
+	//	Level:        utils.Level4Hour,
+	//}).SpotMarket()
 
 	return buyCoins
 }

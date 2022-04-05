@@ -31,6 +31,7 @@ type SystemConf struct {
 	TrendCsv            string `yaml:"TrendCsv"`
 	CointCsv            string `yaml:"CointCsv"`
 	UmbrellaCsv         string `yaml:"UmbrellaCsv"`
+	WeightCsv           string `yaml:"WeightCsv"`
 	CointegrationSrcipt string `yaml:"CointegrationSrcipt"`
 	LogPath             string `yaml:"LogPath"`
 	DBPath              string `yaml:"DBPath"`

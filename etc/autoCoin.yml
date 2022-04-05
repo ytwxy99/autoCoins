@@ -1,4 +1,7 @@
-CoinCsv: "./coin_names.csv"
+TrendCsv: "./trend_coins.csv"
+CointCsv: "./coint_coins.csv"
+UmbrellaCsv: "./umbrella_coins.csv"
+WeightCsv: "./etc/files/weight.csv"
 CointegrationSrcipt: "./scripts/cointegration.py"
 LogPath: "autoCoins.log"
 DBPath: "autoCoin.db"
@@ -12,3 +15,10 @@ options:
   enable_tsl: True
   tsl: -3
   ttp: 3
+
+email:
+  user: "autocoins@163.com"
+  password : "FHYKNBEUYNBYRGAU"
+  host: "smtp.163.com"
+  port: "465"
+  mailTo: ["524737353@qq.com", "415255404@qq.com", "1459884266@qq.com"]
