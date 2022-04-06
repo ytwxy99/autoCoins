@@ -5,6 +5,7 @@ const (
 	Six              = -5
 	Seven            = -6
 	Ten              = -9
+	Thirty           = -30
 	Level15Min       = "15m"
 	Level4Hour       = "4h"
 	Level1Day        = "1d"

@@ -65,7 +65,7 @@ func (c *condition) buyCondition() bool {
 		Intervel:     utils.Five,
 		Level:        utils.Level4Hour,
 	}
-	conditionH := averageArgs.FiveAverage(false) > averageArgs.FiveAverage(true) //4h的FiveAverage是增长的
+	conditionH := averageArgs.Average(false) > averageArgs.Average(true) //4h的FiveAverage是增长的
 
 	//// judgment depends on volume
 	//conditionI := compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Volume], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Volume], 0, 1.1) //volme 增长10%

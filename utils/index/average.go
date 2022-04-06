@@ -18,7 +18,7 @@ type Average struct {
  * @param: the level of markets which support:
  * 10s, 1m, 5m, 15m, 30m, 1h, 4h, 8h, 1d, 7d
  */
-func (average *Average) FiveAverage(backOff bool) float64 {
+func (average *Average) Average(backOff bool) float64 {
 	if !backOff {
 		var sum float64
 		markets := (&interfaces.MarketArgs{

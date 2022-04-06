@@ -1,16 +1,14 @@
 package policy
 
 import (
-	"fmt"
-	"gorm.io/gorm"
 	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
-	"github.com/ytwxy99/autoCoins/interfaces"
 	"github.com/ytwxy99/autoCoins/utils"
 	"github.com/ytwxy99/autoCoins/utils/index"
 )
@@ -25,10 +23,10 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	//futures, err := utils.ReadLines(sysConf.UmbrellaCsv)
 	buyCoins := []string{}
 	sortCoins := map[string]float32{}
+	conditions := map[string]bool{}
 
 	// fetch all weight coins for judging btc
 	weights, err := utils.ReadLines(sysConf.WeightCsv)
-	fmt.Println(weights)
 	if err != nil {
 		logrus.Error("read weight csv failed, err is ", err)
 	}
@@ -63,35 +61,51 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		}
 	}
 
-	//TODO(wangxiaoyu), do right things for weight and btc.
+	for _, weight := range weights {
+		// judgment depends on price average data
+		averageArgs := index.Average{
+			CurrencyPair: weight,
+			Intervel:     utils.Thirty,
+			Level:        utils.Level4Hour,
+		}
+		thirtyAverage := averageArgs.Average(false) >= averageArgs.Average(true)*1.01 //4h的Average是增长的
 
-	//btcMarket := (&interfaces.MarketArgs{
-	//	CurrencyPair: utils.IndexCoin,
-	//	Interval:     -1,
-	//	Level:        utils.Level4Hour,
-	//}).SpotMarket()
+		averageArgs.Intervel = utils.Ten
+		tenAverage := averageArgs.Average(false) > averageArgs.Average(true)
+
+		averageArgs.Intervel = utils.Five
+		fiveAverage := averageArgs.Average(false) > averageArgs.Average(true)
+
+		conditions[weight] = thirtyAverage && tenAverage && fiveAverage
+	}
+
+	for coin, condition := range conditions {
+		if condition {
+			buyCoins = append(buyCoins, coin)
+		}
+	}
 
 	return buyCoins
 }
 
-func macdJudge(marketArgs *interfaces.MarketArgs) bool {
-	k4hValues := marketArgs.SpotMarket()
-	if k4hValues != nil {
-		macdArgs := index.DefaultMacdArgs()
-		k4hMacds := macdArgs.GetMacd(k4hValues)
-		nowK4h := len(k4hMacds) - 1
-		if nowK4h < 5 {
-			return false
-		}
-
-		macdValue := utils.StringToFloat32(k4hMacds[nowK4h]["macd"])
-		if macdValue > 0 {
-			return true
-		}
-	}
-
-	return false
-}
+//func macdJudge(marketArgs *interfaces.MarketArgs) bool {
+//	k4hValues := marketArgs.SpotMarket()
+//	if k4hValues != nil {
+//		macdArgs := index.DefaultMacdArgs()
+//		k4hMacds := macdArgs.GetMacd(k4hValues)
+//		nowK4h := len(k4hMacds) - 1
+//		if nowK4h < 5 {
+//			return false
+//		}
+//
+//		macdValue := utils.StringToFloat32(k4hMacds[nowK4h]["macd"])
+//		if macdValue > 0 {
+//			return true
+//		}
+//	}
+//
+//	return false
+//}
 
 // to judge this coin can be trade or not
 func tradeJugde(coin string, db *gorm.DB) bool {
