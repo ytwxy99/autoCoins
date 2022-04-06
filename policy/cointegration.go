@@ -76,7 +76,16 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		averageArgs.Intervel = utils.Five
 		fiveAverage := averageArgs.Average(false) > averageArgs.Average(true)
 
-		conditions[weight] = thirtyAverage && tenAverage && fiveAverage
+		averageArgs.Intervel = utils.Thirty
+		conditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
+
+		averageArgs.Intervel = utils.Ten
+		conditionB := averageArgs.Average(false) > 0
+
+		averageArgs.Intervel = utils.Five
+		conditionC := averageArgs.Average(false) > 0
+
+		conditions[weight] = thirtyAverage && tenAverage && fiveAverage && conditionA && conditionB && conditionC
 	}
 
 	for coin, condition := range conditions {
