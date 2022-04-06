@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"github.com/ytwxy99/autoCoins/interfaces"
 	"sort"
 	"strings"
 
@@ -61,11 +62,27 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	}
 
 	// monitor btc
-	btcCondition := conditionMonitor(utils.IndexCoin, 1.01)
+	btcCondition := conditionMonitor(utils.IndexCoin, 1.001)
+
+	sports := (&interfaces.MarketArgs{
+		CurrencyPair: utils.IndexCoin,
+		Interval: utils.One,
+		Level: utils.Level4Hour,
+	}).SpotMarket()
+	currentPrice := utils.StringToFloat64(sports[(len(sports)-1)][2])
+
+	averageArgs := index.Average{
+		CurrencyPair: utils.IndexCoin,
+		Intervel:     utils.Thirty,
+		Level:        utils.Level4Hour,
+	}
+	averagePrice := averageArgs.Average(false)
+
+	priceCondition := currentPrice > averagePrice
 
 	for _, weight := range weights {
 		// judgment depends on price average data
-		conditions[weight] = conditionMonitor(weight, 1.001)
+		conditions[weight] = conditionMonitor(weight, 1.005)
 	}
 
 	count := 0
@@ -77,7 +94,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		all++
 	}
 
-	if float32(count)/float32(all) > 0.7 && btcCondition {
+	if float32(count)/float32(all) > 0.7 && btcCondition && priceCondition{
 		if tradeJugde(utils.IndexCoin, db) {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
