@@ -62,19 +62,19 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	}
 
 	// monitor btc
-	btcCondition := conditionMonitor(utils.IndexCoin, 1.001)
+	btcCondition := conditionMonitor(utils.IndexCoin, 1.0)
 
 	sports := (&interfaces.MarketArgs{
 		CurrencyPair: utils.IndexCoin,
-		Interval: utils.One,
-		Level: utils.Level4Hour,
+		Interval:     utils.One,
+		Level:        utils.Level8Hour,
 	}).SpotMarket()
-	currentPrice := utils.StringToFloat64(sports[(len(sports)-1)][2])
+	currentPrice := utils.StringToFloat64(sports[(len(sports) - 1)][2])
 
 	averageArgs := index.Average{
 		CurrencyPair: utils.IndexCoin,
-		Intervel:     utils.Thirty,
-		Level:        utils.Level4Hour,
+		Intervel:     utils.Ten,
+		Level:        utils.Level8Hour,
 	}
 	averagePrice := averageArgs.Average(false)
 
@@ -82,7 +82,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 
 	for _, weight := range weights {
 		// judgment depends on price average data
-		conditions[weight] = conditionMonitor(weight, 1.005)
+		conditions[weight] = conditionMonitor(weight, 1.0)
 	}
 
 	count := 0
@@ -94,7 +94,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		all++
 	}
 
-	if float32(count)/float32(all) > 0.7 && btcCondition && priceCondition{
+	if float32(count)/float32(all) > 0.7 && btcCondition && priceCondition {
 		if tradeJugde(utils.IndexCoin, db) {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
@@ -106,10 +106,10 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 func conditionMonitor(coin string, tenAverageDiff float64) bool {
 	averageArgs := index.Average{
 		CurrencyPair: coin,
-		Intervel:     utils.Thirty,
-		Level:        utils.Level4Hour,
+		Intervel:     utils.Ten,
+		Level:        utils.Level8Hour,
 	}
-	btcThirtyAverage := averageArgs.Average(false) >= averageArgs.Average(true)*tenAverageDiff //4h的Average是增长的
+	btcThirtyAverage := averageArgs.Average(false) > averageArgs.Average(true)*tenAverageDiff //4h的Average是增长的
 
 	averageArgs.Intervel = utils.Ten
 	btcTenAverage := averageArgs.Average(false) > averageArgs.Average(true)
