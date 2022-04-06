@@ -54,7 +54,7 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 	target = &policy.Cointegration{}
 	i := 0
 	for i < 1 {
-		coins := target.Target(db).([]string)
+		coins := target.Target(db, sysConf).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
 				//NOTE(ytwxy99), do real trade.
