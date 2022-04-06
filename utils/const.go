@@ -1,6 +1,7 @@
 package utils
 
 const (
+	One              = -1
 	Five             = -4 // if you want to get 5 days market data, here should be typed -4
 	Six              = -5
 	Seven            = -6
