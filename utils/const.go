@@ -9,6 +9,7 @@ const (
 	Thirty           = -30
 	Level15Min       = "15m"
 	Level4Hour       = "4h"
+	Level8Hour       = "8h"
 	Level1Day        = "1d"
 	Close            = "c"
 	Open             = "o"
