@@ -20,7 +20,6 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	db := args[0].(*gorm.DB)
 	sysConf := args[1].(*configuration.SystemConf)
 
-	//futures, err := utils.ReadLines(sysConf.UmbrellaCsv)
 	buyCoins := []string{}
 	sortCoins := map[string]float32{}
 	conditions := map[string]bool{}
@@ -61,62 +60,59 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		}
 	}
 
+	// monitor btc
+	btcCondition := conditionMonitor(utils.IndexCoin, 1.01)
+
 	for _, weight := range weights {
 		// judgment depends on price average data
-		averageArgs := index.Average{
-			CurrencyPair: weight,
-			Intervel:     utils.Thirty,
-			Level:        utils.Level4Hour,
-		}
-		thirtyAverage := averageArgs.Average(false) >= averageArgs.Average(true)*1.01 //4h的Average是增长的
-
-		averageArgs.Intervel = utils.Ten
-		tenAverage := averageArgs.Average(false) > averageArgs.Average(true)
-
-		averageArgs.Intervel = utils.Five
-		fiveAverage := averageArgs.Average(false) > averageArgs.Average(true)
-
-		averageArgs.Intervel = utils.Thirty
-		conditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
-
-		averageArgs.Intervel = utils.Ten
-		conditionB := averageArgs.Average(false) > 0
-
-		averageArgs.Intervel = utils.Five
-		conditionC := averageArgs.Average(false) > 0
-
-		conditions[weight] = thirtyAverage && tenAverage && fiveAverage && conditionA && conditionB && conditionC
+		conditions[weight] = conditionMonitor(weight, 1.001)
 	}
 
-	for coin, condition := range conditions {
+	count := 0
+	all := 0
+	for _, condition := range conditions {
 		if condition {
-			buyCoins = append(buyCoins, coin)
+			count++
+		}
+		all++
+	}
+
+	if float32(count)/float32(all) > 0.7 && btcCondition {
+		if tradeJugde(utils.IndexCoin, db) {
+			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
 
 	return buyCoins
 }
 
-//func macdJudge(marketArgs *interfaces.MarketArgs) bool {
-//	k4hValues := marketArgs.SpotMarket()
-//	if k4hValues != nil {
-//		macdArgs := index.DefaultMacdArgs()
-//		k4hMacds := macdArgs.GetMacd(k4hValues)
-//		nowK4h := len(k4hMacds) - 1
-//		if nowK4h < 5 {
-//			return false
-//		}
-//
-//		macdValue := utils.StringToFloat32(k4hMacds[nowK4h]["macd"])
-//		if macdValue > 0 {
-//			return true
-//		}
-//	}
-//
-//	return false
-//}
+func conditionMonitor(coin string, tenAverageDiff float64) bool {
+	averageArgs := index.Average{
+		CurrencyPair: coin,
+		Intervel:     utils.Thirty,
+		Level:        utils.Level4Hour,
+	}
+	btcThirtyAverage := averageArgs.Average(false) >= averageArgs.Average(true)*tenAverageDiff //4h的Average是增长的
 
-// to judge this coin can be trade or not
+	averageArgs.Intervel = utils.Ten
+	btcTenAverage := averageArgs.Average(false) > averageArgs.Average(true)
+
+	averageArgs.Intervel = utils.Five
+	btcFiveAverage := averageArgs.Average(false) > averageArgs.Average(true)
+
+	averageArgs.Intervel = utils.Thirty
+	btcConditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
+
+	averageArgs.Intervel = utils.Ten
+	btcConditionB := averageArgs.Average(false) > 0
+
+	averageArgs.Intervel = utils.Five
+	btcConditionC := averageArgs.Average(false) > 0
+
+	return btcThirtyAverage && btcTenAverage && btcFiveAverage && btcConditionA && btcConditionB && btcConditionC
+}
+
+// to judge this coin can be traded or not
 func tradeJugde(coin string, db *gorm.DB) bool {
 	inOrder := database.InOrder{
 		Contract:  coin,
