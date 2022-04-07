@@ -1,6 +1,7 @@
 package trade
 
 import (
+	"github.com/ytwxy99/autoCoins/utils/index"
 	"gorm.io/gorm"
 
 	"github.com/sirupsen/logrus"
@@ -51,6 +52,7 @@ func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []str
 }
 
 func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- string) {
+	var body string
 	target = &policy.Cointegration{}
 	i := 0
 	for i < 1 {
@@ -77,7 +79,19 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
-					err = utils.SendMail(sysConf, "BTC单边协整性策略", "关注币种: "+coin)
+
+					// fetch the 21 interval average of 4h
+					averageArgs := index.Average{
+						CurrencyPair: utils.IndexCoin,
+						Level:        utils.Level4Hour,
+						MA:           utils.MA21,
+					}
+					if averageArgs.Average(false) > averageArgs.Average(false) {
+						body = "建议" + utils.Up + "币种: " + coin
+					} else {
+						body = "建议" + utils.Down + "币种: " + coin
+					}
+					err = utils.SendMail(sysConf, utils.BtcPolicy, body)
 					if err != nil {
 						logrus.Error("Send email failed. the err is ", err)
 					}

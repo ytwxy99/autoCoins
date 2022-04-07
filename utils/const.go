@@ -21,4 +21,7 @@ const (
 	Volume           = "v"
 	DBHistoryDayUniq = "UNIQUE constraint failed: history_day.contract, history_day.time"
 	IndexCoin        = "BTC_USDT"
+	Up               = "做多"
+	Down             = "做空"
+	BtcPolicy        = "umbrella 策略"
 )
