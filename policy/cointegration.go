@@ -127,13 +127,13 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		allDown++
 	}
 
-	if float32(countUp)/float32(allUp) > 0.7 && btcRisingCondition && priceRisingCondition {
+	if float32(countUp)/float32(allUp) > 0.7 && btcRisingCondition && priceRisingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
 		if tradeJugde(utils.IndexCoin, db) {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
 
-	if float32(countDown)/float32(allDown) > 0.7 && btcFallingCondition && priceFallingCondition {
+	if float32(countDown)/float32(allDown) > 0.7 && btcFallingCondition && priceFallingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
 		if tradeJugde(utils.IndexCoin, db) {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
@@ -211,4 +211,46 @@ func (*cSort) sortCoints(coints map[string]float32) []cSort {
 	})
 
 	return cSorts
+}
+
+func averageDiff(coin string, level string) bool {
+	var maValues []float64
+	var max float64
+	var min float64
+
+	mas := []int{
+		utils.MA5,
+		utils.MA10,
+		utils.MA21,
+	}
+
+	for _, ma := range mas {
+		averageArgs := index.Average{
+			CurrencyPair: coin,
+			Level:        level,
+			MA:           ma,
+		}
+		maValues = append(maValues, averageArgs.Average(false))
+	}
+
+	if len(maValues) != 3 {
+		return false
+	}
+
+	for _, value := range maValues {
+		if max == 0 {
+			max = value
+			min = value
+		}
+
+		if value >= max {
+			max = value
+		}
+
+		if value < min {
+			min = value
+		}
+	}
+
+	return (max-min)/min > 0.03
 }
