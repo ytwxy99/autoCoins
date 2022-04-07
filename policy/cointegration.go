@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"github.com/ytwxy99/autoCoins/interfaces"
 	"sort"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
+	"github.com/ytwxy99/autoCoins/interfaces"
 	"github.com/ytwxy99/autoCoins/utils"
 	"github.com/ytwxy99/autoCoins/utils/index"
 )
@@ -64,21 +64,23 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	// monitor btc
 	btcCondition := conditionMonitor(utils.IndexCoin, 1.0)
 
+	// fetch current price
 	sports := (&interfaces.MarketArgs{
 		CurrencyPair: utils.IndexCoin,
-		Interval:     utils.One,
-		Level:        utils.Level8Hour,
+		Interval:     utils.Now,
+		Level:        utils.Level4Hour,
 	}).SpotMarket()
-	currentPrice := utils.StringToFloat64(sports[(len(sports) - 1)][2])
+	currentPrice := utils.StringToFloat64(sports[0][2])
 
+	// fetch the 21 interval average of 4h
 	averageArgs := index.Average{
 		CurrencyPair: utils.IndexCoin,
-		Intervel:     utils.Ten,
-		Level:        utils.Level8Hour,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
 	}
-	averagePrice := averageArgs.Average(false)
 
-	priceCondition := currentPrice > averagePrice
+	average21Per4h := averageArgs.Average(false)
+	priceCondition := currentPrice > average21Per4h
 
 	for _, weight := range weights {
 		// judgment depends on price average data
@@ -106,27 +108,21 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 func conditionMonitor(coin string, tenAverageDiff float64) bool {
 	averageArgs := index.Average{
 		CurrencyPair: coin,
-		Intervel:     utils.Ten,
-		Level:        utils.Level8Hour,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
 	}
-	btcThirtyAverage := averageArgs.Average(false) > averageArgs.Average(true)*tenAverageDiff //4h的Average是增长的
+	MA21Average := averageArgs.Average(false) > averageArgs.Average(true)*tenAverageDiff //4h的Average是增长的
 
-	averageArgs.Intervel = utils.Ten
-	btcTenAverage := averageArgs.Average(false) > averageArgs.Average(true)
+	averageArgs.MA = utils.MA10
+	MA10Average := averageArgs.Average(false) > averageArgs.Average(true)
 
-	averageArgs.Intervel = utils.Five
-	btcFiveAverage := averageArgs.Average(false) > averageArgs.Average(true)
+	averageArgs.MA = utils.MA5
+	MA15Average := averageArgs.Average(false) > averageArgs.Average(true)
 
-	averageArgs.Intervel = utils.Thirty
-	btcConditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
+	//averageArgs.MA = utils.MA21
+	//ConditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
 
-	averageArgs.Intervel = utils.Ten
-	btcConditionB := averageArgs.Average(false) > 0
-
-	averageArgs.Intervel = utils.Five
-	btcConditionC := averageArgs.Average(false) > 0
-
-	return btcThirtyAverage && btcTenAverage && btcFiveAverage && btcConditionA && btcConditionB && btcConditionC
+	return MA21Average && MA10Average && MA15Average
 }
 
 // to judge this coin can be traded or not

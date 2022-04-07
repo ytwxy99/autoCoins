@@ -62,8 +62,8 @@ func (c *condition) buyCondition() bool {
 	// judgment depends on price average data
 	averageArgs := index.Average{
 		CurrencyPair: c.coin,
-		Intervel:     utils.Five,
 		Level:        utils.Level4Hour,
+		MA:           utils.Five,
 	}
 	conditionH := averageArgs.Average(false) > averageArgs.Average(true) //4h的FiveAverage是增长的
 
