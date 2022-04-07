@@ -61,10 +61,9 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		}
 	}
 
-	// monitor btc
-	btcCondition := conditionMonitor(utils.IndexCoin, 1.0)
+	// for rising market
+	btcRisingCondition := conditionUpMonitor(utils.IndexCoin, 1.0)
 
-	// fetch current price
 	sports := (&interfaces.MarketArgs{
 		CurrencyPair: utils.IndexCoin,
 		Interval:     utils.Now,
@@ -78,25 +77,63 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		Level:        utils.Level4Hour,
 		MA:           utils.MA21,
 	}
-
 	average21Per4h := averageArgs.Average(false)
-	priceCondition := currentPrice > average21Per4h
+	priceRisingCondition := currentPrice > average21Per4h
 
 	for _, weight := range weights {
 		// judgment depends on price average data
-		conditions[weight] = conditionMonitor(weight, 1.0)
+		conditions[weight] = conditionUpMonitor(weight, 1.0)
 	}
 
-	count := 0
-	all := 0
+	countUp := 0
+	allUp := 0
 	for _, condition := range conditions {
 		if condition {
-			count++
+			countUp++
 		}
-		all++
+		allUp++
 	}
 
-	if float32(count)/float32(all) > 0.7 && btcCondition && priceCondition {
+	// for falling market
+	btcFallingCondition := conditionDownMonitor(utils.IndexCoin, 1.0)
+
+	sports = (&interfaces.MarketArgs{
+		CurrencyPair: utils.IndexCoin,
+		Interval:     utils.Now,
+		Level:        utils.Level4Hour,
+	}).SpotMarket()
+	currentPrice = utils.StringToFloat64(sports[0][2])
+
+	// fetch the 21 interval average of 4h
+	averageArgs = index.Average{
+		CurrencyPair: utils.IndexCoin,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
+	}
+	average21Per4h = averageArgs.Average(false)
+	priceFallingCondition := currentPrice < average21Per4h
+
+	for _, weight := range weights {
+		// judgment depends on price average data
+		conditions[weight] = conditionDownMonitor(weight, 1.0)
+	}
+
+	countDown := 0
+	allDown := 0
+	for _, condition := range conditions {
+		if condition {
+			countDown++
+		}
+		allDown++
+	}
+
+	if float32(countUp)/float32(allUp) > 0.7 && btcRisingCondition && priceRisingCondition {
+		if tradeJugde(utils.IndexCoin, db) {
+			buyCoins = append(buyCoins, utils.IndexCoin)
+		}
+	}
+
+	if float32(countDown)/float32(allDown) > 0.7 && btcFallingCondition && priceFallingCondition {
 		if tradeJugde(utils.IndexCoin, db) {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
@@ -105,7 +142,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 	return buyCoins
 }
 
-func conditionMonitor(coin string, tenAverageDiff float64) bool {
+func conditionUpMonitor(coin string, tenAverageDiff float64) bool {
 	averageArgs := index.Average{
 		CurrencyPair: coin,
 		Level:        utils.Level4Hour,
@@ -121,6 +158,23 @@ func conditionMonitor(coin string, tenAverageDiff float64) bool {
 
 	//averageArgs.MA = utils.MA21
 	//ConditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
+
+	return MA21Average && MA10Average && MA15Average
+}
+
+func conditionDownMonitor(coin string, averageDiff float64) bool {
+	averageArgs := index.Average{
+		CurrencyPair: coin,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
+	}
+	MA21Average := averageArgs.Average(false)*averageDiff < averageArgs.Average(true) //4h的Average是增长的
+
+	averageArgs.MA = utils.MA10
+	MA10Average := averageArgs.Average(false) < averageArgs.Average(true)
+
+	averageArgs.MA = utils.MA5
+	MA15Average := averageArgs.Average(false) < averageArgs.Average(true)
 
 	return MA21Average && MA10Average && MA15Average
 }
