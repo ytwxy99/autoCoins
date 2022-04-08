@@ -156,9 +156,6 @@ func conditionUpMonitor(coin string, tenAverageDiff float64) bool {
 	averageArgs.MA = utils.MA5
 	MA15Average := averageArgs.Average(false) > averageArgs.Average(true)
 
-	//averageArgs.MA = utils.MA21
-	//ConditionA := averageArgs.Average(false) <= averageArgs.Average(true)*1.001
-
 	return MA21Average && MA10Average && MA15Average
 }
 
