@@ -1,7 +1,6 @@
 package trade
 
 import (
-	"github.com/ytwxy99/autoCoins/utils/index"
 	"gorm.io/gorm"
 
 	"github.com/sirupsen/logrus"
@@ -10,6 +9,7 @@ import (
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/policy"
 	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/utils/index"
 )
 
 var target policy.Policy
@@ -23,7 +23,7 @@ func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []str
 				//NOTE(ytwxy99), do real trade.
 				inOrder := database.InOrder{
 					Contract:  coin,
-					Direction: "up",
+					Direction: utils.DirectionUp,
 				}
 
 				record, err := inOrder.FetchOneInOrder(db)
@@ -59,10 +59,22 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 		coins := target.Target(db, sysConf).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
-				//NOTE(ytwxy99), do real trade.
+				// fetch the 21 interval average of 4h
 				inOrder := database.InOrder{
-					Contract:  coin,
-					Direction: "up",
+					Contract: coin,
+				}
+
+				averageArgs := index.Average{
+					CurrencyPair: utils.IndexCoin,
+					Level:        utils.Level4Hour,
+					MA:           utils.MA21,
+				}
+				if averageArgs.Average(false) > averageArgs.Average(false) {
+					body = utils.Up + coin
+					inOrder.Direction = utils.DirectionUp
+				} else {
+					body = utils.Down + coin
+					inOrder.Direction = utils.DirectionDown
 				}
 
 				record, err := inOrder.FetchOneInOrder(db)
@@ -79,18 +91,6 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
-
-					// fetch the 21 interval average of 4h
-					averageArgs := index.Average{
-						CurrencyPair: utils.IndexCoin,
-						Level:        utils.Level4Hour,
-						MA:           utils.MA21,
-					}
-					if averageArgs.Average(false) > averageArgs.Average(false) {
-						body = "建议" + utils.Up + "币种: " + coin
-					} else {
-						body = "建议" + utils.Down + "币种: " + coin
-					}
 					err = utils.SendMail(sysConf, utils.BtcPolicy, body)
 					if err != nil {
 						logrus.Error("Send email failed. the err is ", err)

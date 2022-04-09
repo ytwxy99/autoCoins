@@ -29,6 +29,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Level:        average.Level,
 			}).SpotMarket()
 
+			if markets == nil {
+				return 0
+			}
+
 			for i, market := range markets {
 				if i >= 4 {
 					sum = sum + utils.StringToFloat64(market[2])
@@ -42,6 +46,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Interval:     int(intervel),
 				Level:        average.Level,
 			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
 
 			for i, market := range markets {
 				if i == len(markets)-1 {
@@ -63,6 +71,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Level:        average.Level,
 			}).SpotMarket()
 
+			if markets == nil {
+				return 0
+			}
+
 			for i, market := range markets {
 				if i >= 3 {
 					sum = sum + utils.StringToFloat64(market[2])
@@ -76,6 +88,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Interval:     int(intervel),
 				Level:        average.Level,
 			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
 
 			for i, market := range markets {
 				if i == len(markets)-1 {
@@ -97,6 +113,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Level:        average.Level,
 			}).SpotMarket()
 
+			if markets == nil {
+				return 0
+			}
+
 			for i, market := range markets {
 				if i >= 2 {
 					sum = sum + utils.StringToFloat64(market[2])
@@ -110,6 +130,10 @@ func (average *Average) Average(backOff bool) float64 {
 				Interval:     int(intervel),
 				Level:        average.Level,
 			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
 
 			for i, market := range markets {
 				if i == len(markets)-1 {

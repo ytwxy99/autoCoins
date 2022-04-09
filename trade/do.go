@@ -22,7 +22,7 @@ type Session struct {
 
 // Sells, adjusts TP and SL according to trailing values
 // and buys new coins
-func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string, policy string, f func(policy string, args ...interface{}) bool) {
+func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string, policy string) {
 	// set necessary vars
 	var volume float32
 	var amount float32
@@ -82,6 +82,17 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				"lowStop":   storedPrice + storedPrice*order.Sl/100,
 			}).Info("the monitor of get_last_price existing coin, ")
 
+			// sell args stuct
+			sellArgs := &SellArgs{
+				Contract:       orderCoins.Contract,
+				Policy:         policy,
+				db:             db,
+				LastPrice:      lastPrice,
+				StoredPrice:    storedPrice,
+				OrderDirection: direction,
+				sysConfig:      sysConf,
+			}
+
 			if lastPrice > storedPrice+(storedPrice*order.Tp/10) && sysConf.Options.EnableTsl {
 				// increase as absolute value for TP
 				newTp := lastPrice + lastPrice*order.Ttp/100
@@ -102,7 +113,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				logrus.Infof("updated tp: %v, new_top_price: %v", newTp, newTopPrice)
 				logrus.Infof("updated sl: %v, new_stop_price: %v", newSl, newStopPrice)
 				//} else if lastPrice < (storedPrice + storedPrice*order.Sl/100) {
-			} else if f(policy, lastPrice, storedPrice, coin, direction, db) {
+			} else if sellArgs.SellPolicy() {
 				// sell coin
 				// TODO(ytwxy99), why do it by this way？
 				fees := order.Fee
