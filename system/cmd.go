@@ -20,16 +20,16 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	// init action
 	var InitCmd = &cobra.Command{
 		Use:   "init [string to echo]",
-		Short: "Init trade envirment",
+		Short: "Init trade environment",
 		Run: func(cmd *cobra.Command, args []string) {
 			initErr := make(chan error)
 			go func() {
 				for {
 					logrus.Info("Initialize trading system ……")
-					err := InitFutures(ctx, sysConf.UmbrellaCsv)
-					if err != nil {
-						logrus.Error("get all futures error: %v\n", err)
-					}
+					//err := InitFutures(ctx, sysConf.UmbrellaCsv)
+					//if err != nil {
+					//	logrus.Error("get all futures error: %v\n", err)
+					//}
 
 					result, err := c.GetSpotAllCoins(ctx)
 					if err != nil {
