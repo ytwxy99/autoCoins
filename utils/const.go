@@ -26,4 +26,5 @@ const (
 	BtcPolicy        = "umbrella 策略"
 	DirectionUp      = "up"
 	DirectionDown    = "down"
+	ClearOrder       = "清仓退出"
 )

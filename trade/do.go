@@ -166,6 +166,11 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				if err != nil {
 					logrus.Errorf("add Sold error : %v , Sold is %v:", err, soldCoins)
 				}
+
+				if policy == "cointegration" {
+					body := utils.Down + coin
+					utils.SendMail(sysConf, utils.ClearOrder, body)
+				}
 				break // this trade is over, break 'for{}'
 			}
 

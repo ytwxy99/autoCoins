@@ -2,12 +2,12 @@ package system
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 
 	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
