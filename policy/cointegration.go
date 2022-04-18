@@ -17,7 +17,7 @@ import (
 type Cointegration struct{}
 
 // cointegration policy
-func (*Cointegration) Target(args ...interface{}) interface{} {
+func (Cointegration) Target(args ...interface{}) interface{} {
 	db := args[0].(*gorm.DB)
 	sysConf := args[1].(*configuration.SystemConf)
 
@@ -56,6 +56,7 @@ func (*Cointegration) Target(args ...interface{}) interface{} {
 		}
 
 		if !cointFlag {
+			//TODO(wangxiaoyu), here has a bug.
 			weights = append(weights[:i], weights[i+1:]...)
 			logrus.Error("There is no correlation with BTC, the coin is ", weight)
 		}

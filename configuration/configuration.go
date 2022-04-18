@@ -35,6 +35,7 @@ type SystemConf struct {
 	CointegrationSrcipt string `yaml:"CointegrationSrcipt"`
 	LogPath             string `yaml:"LogPath"`
 	DBPath              string `yaml:"DBPath"`
+	DBType              string `yaml:"DBType"`
 	Options             struct {
 		Quantity  float32 `yaml:"quantity"`
 		Pairing   string  `yaml:"pairing"`
@@ -51,6 +52,13 @@ type SystemConf struct {
 		Host     string   `yaml:"host"`
 		Port     string   `yaml:"port"`
 		MailTo   []string `yaml:"mailTo"`
+	}
+	Mysql struct {
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Database string `yaml:"Database"`
 	}
 }
 
