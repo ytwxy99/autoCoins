@@ -3,19 +3,20 @@ import sys
 
 import statsmodels.tsa.stattools as ts
 
-from database import sqlite3
+from database import db
 from utils import file
 from utils import pandas
 
 COINTEGRATION_DB = "cointegration"
 
-def initDatabase(dbPath):
+def initDatabase(argv):
     """init database object
 
-    :param dbPath: the database path
+    :param dbPath: argv
     :return: the object of database
     """
-    database = sqlite3.Database(sys.argv[1])
+    database = db.Database(sys.argv)
+    #database = db.Database(sys.argv[1])
     database.initDb()
     return database
 
@@ -23,7 +24,7 @@ def initDatabase(dbPath):
 def pandasSeries(database, coins):
     """format pandas Series object
 
-    :param database: the sqlite3 database object
+    :param database: the database object
     :param conis: all coins information
     """
     series = dict()
@@ -77,9 +78,10 @@ def main():
     # ref: https://www.likecs.com/show-204274989.html
     try:
         cointResult = dict()
-        database = initDatabase(sys.argv[1])
+        # database = initDatabase(sys.argv[3])
+        database = initDatabase(sys.argv)
 
-        coins = [coin.strip("\n") for coin in file.getFileContent(sys.argv[2])]
+        coins = [coin.strip("\n") for coin in file.getFileContent(sys.argv[1])]
         series = pandasSeries(database, coins)
         storeCoints = getCointegration(coins, series)
         #NOTE(wangxiaoyu), cointegration judgment

@@ -26,10 +26,10 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 			go func() {
 				for {
 					logrus.Info("Initialize trading system ……")
-					//err := InitFutures(ctx, sysConf.UmbrellaCsv)
-					//if err != nil {
-					//	logrus.Error("get all futures error: %v\n", err)
-					//}
+					err := InitFutures(ctx, sysConf.UmbrellaCsv)
+					if err != nil {
+						logrus.Error("get all futures error: %v\n", err)
+					}
 
 					result, err := c.GetSpotAllCoins(ctx)
 					if err != nil {
@@ -42,14 +42,14 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 					}
 
 					// use futures to statistics cointegration
-					err = InitCointegrationPairs(result, sysConf.UmbrellaCsv, db)
+					err = InitCointegrationPairs(result, sysConf.CointCsv, db)
 					if err != nil {
 						initErr <- err
 					}
 
 					logrus.Info("update all spot coins into csv finished!")
 
-					err = InitCointegration(sysConf.DBPath, sysConf.CointegrationSrcipt, sysConf.UmbrellaCsv)
+					err = InitCointegration(sysConf)
 					if err != nil {
 						initErr <- err
 					}

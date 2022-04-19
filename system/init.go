@@ -106,11 +106,24 @@ func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *g
 	return utils.WriteLines(coins, filePath)
 }
 
-func InitCointegration(dbPath string, scriptPath string, coinCsv string) error {
-	cmd := exec.Command("python3", scriptPath, dbPath, coinCsv)
+func InitCointegration(sysConf *configuration.SystemConf) error {
+	args := []string{
+		sysConf.CointegrationSrcipt, // index 0
+		sysConf.CointCsv,            // index 1
+		sysConf.DBType,              // index 2
+		sysConf.DBPath,              // index 3
+		sysConf.Mysql.User,
+		sysConf.Mysql.Password,
+		sysConf.Mysql.Port,
+		sysConf.Mysql.Host,
+		sysConf.Mysql.Database,
+	}
+	cmd := exec.Command("python3", args...)
+	logrus.Info("excute cointegration srcipt: ", args)
+	//cmd := exec.Command("python3", sysConf.CointegrationSrcipt, sysConf.DBPath, sysConf.UmbrellaCsv)
 	_, err := cmd.Output()
 	if err != nil {
-		logrus.Error("run cointegration python srcipt error: %v", err)
+		logrus.Error("run cointegration python srcipt failed. ", "error: ", err)
 		return err
 	}
 

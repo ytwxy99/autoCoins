@@ -2,7 +2,7 @@ package database
 
 import (
 	"time"
-	
+
 	"gorm.io/gorm"
 )
 
@@ -31,7 +31,7 @@ type Order struct {
 }
 
 func (order Order) TableName() string {
-	return "order"
+	return "orders"
 }
 
 type Sold struct {
@@ -55,25 +55,25 @@ type Sold struct {
 }
 
 func (sold Sold) TableName() string {
-	return "sold"
+	return "solds"
 }
 
 type InOrder struct {
 	gorm.Model
 
-	Contract  string
-	Direction string
-	Pair      string
+	Contract  string `gorm:"type:varchar(16)"`
+	Direction string `gorm:"type:varchar(16)"`
+	Pair      string `gorm:"type:varchar(16)"`
 }
 
 func (inorder InOrder) TableName() string {
-	return "inorder"
+	return "inorders"
 }
 
 type HistoryDay struct {
-	Contract string    `json:"contract"  gorm:"primary_key"`
-	Time     time.Time `json:"time"  gorm:"primary_key"`
-	Price    string
+	Contract string    `gorm:"primary_key;index:contract_idx;type:varchar(16)"`
+	Time     time.Time `gorm:"primary_key;index:time_idx"`
+	Price    string    `gorm:"type:varchar(16)"`
 }
 
 func (HistoryDay HistoryDay) TableName() string {
@@ -81,8 +81,8 @@ func (HistoryDay HistoryDay) TableName() string {
 }
 
 type Cointegration struct {
-	Pair   string `json:"pair"  gorm:"primary_key"`
-	Pvalue string
+	Pair   string `gorm:"primary_key;index:pair_idx;type:varchar(16)"`
+	Pvalue string `gorm:"type:varchar(16)"`
 }
 
 func (cointegration Cointegration) TableName() string {
@@ -92,8 +92,8 @@ func (cointegration Cointegration) TableName() string {
 type TradeDetail struct {
 	gorm.Model
 
-	Contract  string
-	CointPair string
+	Contract  string `gorm:"type:varchar(16)"`
+	CointPair string `gorm:"type:varchar(16)"`
 }
 
 func (tradeDetail TradeDetail) TableName() string {
