@@ -5,6 +5,7 @@ WeightCsv: "./etc/files/weight.csv"
 CointegrationSrcipt: "./scripts/cointegration.py"
 LogPath: "autoCoins.log"
 DBPath: "autoCoin.db"
+DBType: "mysql"
 
 options:
   quantity: 15  # 总金额
@@ -22,3 +23,10 @@ email:
   host: "smtp.163.com"
   port: "465"
   mailTo: ["524737353@qq.com", "415255404@qq.com", "1459884266@qq.com"]
+
+mysql:
+  user: "root"
+  password : ""
+  host: "127.0.0.1"
+  port: "3306"
+  Database: "autocoins"
