@@ -119,8 +119,7 @@ func InitCointegration(sysConf *configuration.SystemConf) error {
 		sysConf.Mysql.Database,
 	}
 	cmd := exec.Command("python3", args...)
-	logrus.Info("excute cointegration srcipt: ", args)
-	//cmd := exec.Command("python3", sysConf.CointegrationSrcipt, sysConf.DBPath, sysConf.UmbrellaCsv)
+
 	_, err := cmd.Output()
 	if err != nil {
 		logrus.Error("run cointegration python srcipt failed. ", "error: ", err)

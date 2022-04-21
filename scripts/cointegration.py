@@ -16,7 +16,6 @@ def initDatabase(argv):
     :return: the object of database
     """
     database = db.Database(sys.argv)
-    #database = db.Database(sys.argv[1])
     database.initDb()
     return database
 
@@ -78,7 +77,6 @@ def main():
     # ref: https://www.likecs.com/show-204274989.html
     try:
         cointResult = dict()
-        # database = initDatabase(sys.argv[3])
         database = initDatabase(sys.argv)
 
         coins = [coin.strip("\n") for coin in file.getFileContent(sys.argv[1])]
@@ -92,6 +90,8 @@ def main():
                     cointResult[pair] = pValue
 
         coints = sorted(cointResult.items(), key=lambda x: x[1], reverse=False)
+
+        database = initDatabase(sys.argv)
         for coint in coints:
             cointP = database.getCointegration(COINTEGRATION_DB, coint[0]).fetchall()
             if len(cointP) > 0:

@@ -1,11 +1,17 @@
 # -*- coding:utf8 -*-
 import sqlite3
-
+import mysql.connector
 
 class Database(object):
-    def __init__(self, dbPath):
-        self.dbPath = dbPath
+    def __init__(self, argv):
         self.conn = None
+        self.dbType = argv[2]
+        self.dbPath = argv[3]
+        self.user = argv[4]
+        self.password = argv[5]
+        self.port = argv[6]
+        self.host = argv[7]
+        self.database = argv[8]
 
     def initDb(self):
         """get sqlite3 connection object
@@ -13,7 +19,16 @@ class Database(object):
         :param dbPath: sqlite3 database file
         :return: database connection object
         """
-        self.conn = sqlite3.connect(self.dbPath)
+        if self.dbType == "sqlite3":
+            self.conn = sqlite3.connect(self.dbPath)
+        elif self.dbType == "mysql":
+            # we should set wait_time of mysql configure to 1h
+            self.conn = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+            )
 
     def closeDB(self):
         """close sqlite3 connection
@@ -31,9 +46,12 @@ class Database(object):
         :return: all records by specified database table
         """
         c = self.conn.cursor()
-        cursor = c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
-
-        return cursor
+        if self.dbType == "sqlite3":
+            cursor = c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
+            return cursor
+        elif self.dbType == "mysql":
+            c.execute("SELECT * from %s where contract = '%s'" % (tableName, coin))
+            return c.fetchall()
 
     def getCointegration(self, tableName, pair):
         """get all records by specified database table
@@ -43,9 +61,12 @@ class Database(object):
         :return: all records by specified database table
         """
         c = self.conn.cursor()
-        cursor = c.execute("SELECT * from %s where pair = '%s'" % (tableName, pair))
-
-        return cursor
+        if self.dbType == "sqlite3":
+            cursor = c.execute("SELECT * from %s where pair = '%s'" % (tableName, pair))
+            return cursor
+        elif self.dbType == "mysql":
+            c.execute("SELECT * from %s where pair = '%s'" % (tableName, pair))
+            return c
 
     def insertCointegration(self, tableName, pair, pValue):
         """insert a cointegration data into Cointegration table
