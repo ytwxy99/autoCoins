@@ -17,7 +17,7 @@ import (
 )
 
 func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
-	var historyDay *database.HistoryDay
+	//var historyDay *database.HistoryDay
 	coins := []string{}
 	for _, pair := range pairs {
 		// just record coin which is tradable
@@ -30,26 +30,6 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 
 			if len(values) < 150 {
 				continue
-			}
-
-			for _, value := range values {
-				timeTrans, err := time.ParseInLocation("2006-01-02 08:00:00", value[0], time.Local)
-				if err != nil {
-					logrus.Error("get time type from string error: %v\n", err)
-				}
-
-				historyDay = &database.HistoryDay{
-					Contract: pair.Id,
-					Time:     timeTrans,
-					Price:    value[2],
-				}
-
-				err = historyDay.AddHistoryDay(db)
-				if err != nil {
-					if err.Error() != utils.DBHistoryDayUniq {
-						logrus.Error("add HistoryDay record error: %v\n", err)
-					}
-				}
 			}
 
 			if len(values) != 0 && utils.StringToFloat32(values[0][1]) >= 50000.0 {

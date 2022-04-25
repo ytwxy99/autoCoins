@@ -102,46 +102,46 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 }
 
 func DoUmbrella(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- string) {
-	//var body string
-	//var sends []string
-	target = &policy.Umbrella{}
-	target.Target(db, sysConf)
-	//i := 0
-	//for i < 1 {
-	//	coins := target.Target(db).([]string)
-	//	if len(coins) != 0 {
-	//		for _, coin := range coins {
-	//			//NOTE(ytwxy99), do real trade.
-	//			inOrder := database.InOrder{
-	//				Contract:  coin,
-	//				Direction: "up",
-	//			}
-	//
-	//			record, err := inOrder.FetchOneInOrder(db)
-	//			if err != nil {
-	//				logrus.Info("Can't find in inOrder record, then will be traded : ", coin)
-	//			}
-	//
-	//			if record == nil {
-	//				// do buy
-	//				err = (&inOrder).AddInOrder(db)
-	//				if err != nil {
-	//					logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
-	//					continue
-	//				}
-	//				buyCoins <- coin
-	//				logrus.Info("Find it!  to get it : ", coin)
-	//				sends = append(sends, coin)
-	//			}
-	//		}
-	//
-	//		for _, send := range sends {
-	//			body = body + send + " "
-	//		}
-	//		err := utils.SendMail(sysConf, "BTC单边协整性策略", "关注币种: "+body)
-	//		if err != nil {
-	//			logrus.Error("Send email failed. the err is ", err)
-	//		}
-	//	}
-	//}
+	var body string
+	var sends []string
+
+	i := 0
+	for i < 1 {
+		target = &policy.Umbrella{}
+		coins := target.Target(db).([]string)
+		if len(coins) != 0 {
+			for _, coin := range coins {
+				//NOTE(ytwxy99), do real trade.
+				inOrder := database.InOrder{
+					Contract:  coin,
+					Direction: "up",
+				}
+
+				record, err := inOrder.FetchOneInOrder(db)
+				if err != nil {
+					logrus.Info("Can't find in inOrder record, then will be traded : ", coin)
+				}
+
+				if record == nil {
+					// do buy
+					err = (&inOrder).AddInOrder(db)
+					if err != nil {
+						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
+						continue
+					}
+					buyCoins <- coin
+					logrus.Info("Find it!  to get it : ", coin)
+					sends = append(sends, coin)
+				}
+			}
+
+			for _, send := range sends {
+				body = body + send + " "
+			}
+			err := utils.SendMail(sysConf, "BNB单边协整性策略", "关注币种: "+body)
+			if err != nil {
+				logrus.Error("Send email failed. the err is ", err)
+			}
+		}
+	}
 }

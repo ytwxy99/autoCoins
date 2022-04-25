@@ -61,9 +61,9 @@ func (sold Sold) TableName() string {
 type InOrder struct {
 	gorm.Model
 
-	Contract  string `gorm:"type:varchar(16)"`
-	Direction string `gorm:"type:varchar(16)"`
-	Pair      string `gorm:"type:varchar(16)"`
+	Contract  string `gorm:"type:varchar(32)"`
+	Direction string `gorm:"type:varchar(32)"`
+	Pair      string `gorm:"type:varchar(32)"`
 }
 
 func (inorder InOrder) TableName() string {
@@ -71,9 +71,9 @@ func (inorder InOrder) TableName() string {
 }
 
 type HistoryDay struct {
-	Contract string    `gorm:"primary_key;index:contract_idx;type:varchar(16)"`
+	Contract string    `gorm:"primary_key;index:contract_idx;type:varchar(32)"`
 	Time     time.Time `gorm:"primary_key;index:time_idx"`
-	Price    string    `gorm:"type:varchar(16)"`
+	Price    string    `gorm:"type:varchar(32)"`
 }
 
 func (HistoryDay HistoryDay) TableName() string {
@@ -81,8 +81,8 @@ func (HistoryDay HistoryDay) TableName() string {
 }
 
 type Cointegration struct {
-	Pair   string `gorm:"primary_key;index:pair_idx;type:varchar(16)"`
-	Pvalue string `gorm:"type:varchar(16)"`
+	Pair   string `gorm:"primary_key;type:varchar(32)"`
+	Pvalue string `gorm:"type:varchar(64)"`
 }
 
 func (cointegration Cointegration) TableName() string {
@@ -92,8 +92,8 @@ func (cointegration Cointegration) TableName() string {
 type TradeDetail struct {
 	gorm.Model
 
-	Contract  string `gorm:"type:varchar(16)"`
-	CointPair string `gorm:"type:varchar(16)"`
+	Contract  string `gorm:"type:varchar(32)"`
+	CointPair string `gorm:"type:varchar(32)"`
 }
 
 func (tradeDetail TradeDetail) TableName() string {

@@ -91,7 +91,6 @@ def main():
 
         coints = sorted(cointResult.items(), key=lambda x: x[1], reverse=False)
 
-        database = initDatabase(sys.argv)
         for coint in coints:
             cointP = database.getCointegration(COINTEGRATION_DB, coint[0]).fetchall()
             if len(cointP) > 0:
