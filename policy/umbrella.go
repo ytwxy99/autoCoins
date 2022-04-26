@@ -1,10 +1,8 @@
 package policy
 
 import (
-	"gorm.io/gorm"
-	"strings"
-
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
@@ -19,7 +17,6 @@ func (*Umbrella) Target(args ...interface{}) interface{} {
 	db := args[0].(*gorm.DB)
 	sysConf := args[1].(*configuration.SystemConf)
 
-	sortCoins := map[string]float32{}
 	buyCoins := []string{}
 	conditions := map[string]bool{}
 
@@ -32,32 +29,6 @@ func (*Umbrella) Target(args ...interface{}) interface{} {
 	coints, err := database.GetAllCoint(db)
 	if err != nil || len(coints) == 0 {
 		logrus.Error("get cointegration from database error: ", err)
-	}
-
-	for _, coint := range coints {
-		if containsBtc := strings.Contains(coint.Pair, utils.IndexPlatformCoin); containsBtc {
-			sortCoins[coint.Pair] = utils.StringToFloat32(coint.Pvalue)
-		}
-	}
-
-	cSorts := (&cSort{}).sortCoints(sortCoins)
-	for i, weight := range weights {
-		cointFlag := false
-		for _, cSort := range cSorts {
-			for _, coin := range strings.Split(cSort.Pair, "-") {
-				if coin == utils.IndexPlatformCoin {
-					if strings.Contains(cSort.Pair, weight) {
-						cointFlag = true
-					}
-				}
-			}
-		}
-
-		if !cointFlag {
-			//TODO(wangxiaoyu), here has a bug.
-			weights = append(weights[:i], weights[i+1:]...)
-			logrus.Error("There is no correlation with BTC, the coin is ", weight)
-		}
 	}
 
 	// for rising market
