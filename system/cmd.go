@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
-	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/gateway"
+	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/trade"
 )
 
@@ -31,7 +31,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 						logrus.Error("get all futures error: %v\n", err)
 					}
 
-					result, err := c.GetSpotAllCoins(ctx)
+					result, err := client.GetSpotAllCoins(ctx)
 					if err != nil {
 						logrus.Error("get all spot coins error: %v\n", err)
 					}
@@ -74,7 +74,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Start autoCoins gateway",
 		Run: func(cmd *cobra.Command, args []string) {
 			router := gin.Default()
-			gateway.Router(c.Client, router, sysConf, db)
+			gateway.Router(client.Client, router, sysConf, db)
 		},
 	}
 

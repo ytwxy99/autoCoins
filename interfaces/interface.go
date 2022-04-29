@@ -6,7 +6,7 @@ import (
 
 	"github.com/gateio/gateapi-go/v6"
 
-	c "github.com/ytwxy99/autoCoins/client"
+	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
@@ -23,7 +23,7 @@ type Future struct {
 func (marketArgs *MarketArgs) SpotMarket() [][]string {
 	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
-	values := c.GetSpotCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
+	values := client.GetSpotCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
 
 	if values != nil {
 		for _, v := range values {
@@ -40,7 +40,7 @@ func (marketArgs *MarketArgs) SpotMarket() [][]string {
 func (marketArgs *MarketArgs) FutureMarket() []gateapi.FuturesCandlestick {
 	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
-	futures := c.GetFutureCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
+	futures := client.GetFutureCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
 
 	if futures != nil {
 		return futures
@@ -50,7 +50,7 @@ func (marketArgs *MarketArgs) FutureMarket() []gateapi.FuturesCandlestick {
 }
 
 func (future *Future) GetAllFutures(ctx context.Context) ([]gateapi.Contract, error) {
-	contracts, _, err := c.Client.FuturesApi.ListFuturesContracts(ctx, future.Settle)
+	contracts, _, err := client.Client.FuturesApi.ListFuturesContracts(ctx, future.Settle)
 	if err != nil {
 		return nil, err
 	}

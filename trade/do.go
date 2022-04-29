@@ -6,9 +6,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
+	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
@@ -62,7 +62,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				continue
 			}
 
-			currentCoin, err := c.GetCurrencyPair(coin)
+			currentCoin, err := client.GetCurrencyPair(coin)
 			if err != nil {
 				logrus.Error("DoTrade -> get last price err: %v", err)
 				continue
@@ -175,7 +175,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 			}
 
 		} else if order == nil && coin != "" {
-			currentCoin, err := c.GetCurrencyPair(coin)
+			currentCoin, err := client.GetCurrencyPair(coin)
 			if err != nil {
 				logrus.Error("DoTrade -> get last price err: %v", err)
 				continue
@@ -231,7 +231,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 			if sysConf.Options.Test {
 				// 价格在得到价格和实际交易过程中下跌，取消下单
 				time.Sleep(500 * time.Millisecond)
-				currentCoin, err := c.GetCurrencyPair(coin)
+				currentCoin, err := client.GetCurrencyPair(coin)
 				if err != nil {
 					logrus.Error("DoTrade -> get last price err: %v", err)
 					continue

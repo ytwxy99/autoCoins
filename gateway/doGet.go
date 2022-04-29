@@ -9,8 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	c "github.com/ytwxy99/autoCoins/client"
 	"github.com/ytwxy99/autoCoins/database"
+	client2 "github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
@@ -56,7 +56,7 @@ func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
 	}
 
 	for _, order := range orders {
-		currentCoin, err := c.GetCurrencyPair(order.Contract)
+		currentCoin, err := client2.GetCurrencyPair(order.Contract)
 		if err != nil {
 			context.String(http.StatusInternalServerError, "Get last price failed: ", err)
 		}
