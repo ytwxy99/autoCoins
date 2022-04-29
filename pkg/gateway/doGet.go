@@ -10,7 +10,7 @@ import (
 
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/pkg/client"
-	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/pkg/utils"
 )
 
 func ReadLog(context *gin.Context, filePath string) {

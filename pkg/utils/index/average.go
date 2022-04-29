@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/ytwxy99/autoCoins/pkg/interfaces"
-	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/pkg/utils"
 )
 
 type Average struct {

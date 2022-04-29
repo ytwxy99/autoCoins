@@ -2,8 +2,8 @@ package policy
 
 import (
 	"github.com/ytwxy99/autoCoins/pkg/interfaces"
-	"github.com/ytwxy99/autoCoins/utils"
-	"github.com/ytwxy99/autoCoins/utils/index"
+	"github.com/ytwxy99/autoCoins/pkg/utils"
+	"github.com/ytwxy99/autoCoins/pkg/utils/index"
 )
 
 type MacdPolicy struct{}

@@ -2,7 +2,6 @@ package system
 
 import (
 	"context"
-	interfaces2 "github.com/ytwxy99/autoCoins/pkg/interfaces"
 	"os/exec"
 	"time"
 
@@ -13,7 +12,8 @@ import (
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/pkg/configuration"
-	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/pkg/interfaces"
+	"github.com/ytwxy99/autoCoins/pkg/utils"
 )
 
 func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
@@ -22,7 +22,7 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 	for _, pair := range pairs {
 		// just record coin which is tradable
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
-			values := (&interfaces2.MarketArgs{
+			values := (&interfaces.MarketArgs{
 				CurrencyPair: pair.Id,
 				Interval:     -150,
 				Level:        utils.Level1Day,
@@ -47,7 +47,7 @@ func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *g
 	for _, pair := range pairs {
 		// just record coin which is tradable
 		if pair.TradeStatus == "tradable" && pair.Quote == "USDT" {
-			values := (&interfaces2.MarketArgs{
+			values := (&interfaces.MarketArgs{
 				CurrencyPair: pair.Id,
 				Interval:     -900,
 				Level:        utils.Level1Day,
@@ -111,7 +111,7 @@ func InitCointegration(sysConf *configuration.SystemConf) error {
 
 func InitFutures(ctx context.Context, coinCsv string) error {
 	coins := []string{}
-	futures, err := (&interfaces2.Future{
+	futures, err := (&interfaces.Future{
 		Settle: client.Settle,
 	}).GetAllFutures(ctx)
 	if err != nil {

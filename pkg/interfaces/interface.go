@@ -7,7 +7,7 @@ import (
 	"github.com/gateio/gateapi-go/v6"
 
 	"github.com/ytwxy99/autoCoins/pkg/client"
-	"github.com/ytwxy99/autoCoins/utils"
+	"github.com/ytwxy99/autoCoins/pkg/utils"
 )
 
 type MarketArgs struct {
