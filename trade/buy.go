@@ -5,8 +5,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
+	configuration "github.com/ytwxy99/autoCoins/pkg/configuration"
 	"github.com/ytwxy99/autoCoins/policy"
 	"github.com/ytwxy99/autoCoins/utils"
 	"github.com/ytwxy99/autoCoins/utils/index"

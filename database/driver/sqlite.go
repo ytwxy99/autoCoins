@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/ytwxy99/autoCoins/configuration"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 )
 
 type SqliteDrive struct {

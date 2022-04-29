@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
-	"github.com/ytwxy99/autoCoins/configuration"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 )
 
 // read Key&Secret from yaml

@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
 	"github.com/ytwxy99/autoCoins/database"
-	client2 "github.com/ytwxy99/autoCoins/pkg/client"
+	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
@@ -48,7 +47,7 @@ func ReadSold(context *gin.Context, db *gorm.DB) {
 	context.String(http.StatusOK, sums)
 }
 
-func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
+func ReadOrder(context *gin.Context, db *gorm.DB) {
 	var contents string
 	orders, err := database.GetAllOrder(db)
 	if err != nil {
@@ -56,7 +55,7 @@ func ReadOrder(client *gateapi.APIClient, context *gin.Context, db *gorm.DB) {
 	}
 
 	for _, order := range orders {
-		currentCoin, err := client2.GetCurrencyPair(order.Contract)
+		currentCoin, err := client.GetCurrencyPair(order.Contract)
 		if err != nil {
 			context.String(http.StatusInternalServerError, "Get last price failed: ", err)
 		}

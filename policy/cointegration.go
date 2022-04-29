@@ -7,9 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/configuration"
 	"github.com/ytwxy99/autoCoins/database"
 	"github.com/ytwxy99/autoCoins/interfaces"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 	"github.com/ytwxy99/autoCoins/utils"
 	"github.com/ytwxy99/autoCoins/utils/index"
 )

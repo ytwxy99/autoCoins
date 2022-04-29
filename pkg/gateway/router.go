@@ -6,7 +6,7 @@ import (
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 
-	"github.com/ytwxy99/autoCoins/configuration"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 )
 
 func Router(client *gateapi.APIClient, engine *gin.Engine, sysConf *configuration.SystemConf, db *gorm.DB) {
@@ -17,7 +17,7 @@ func Router(client *gateapi.APIClient, engine *gin.Engine, sysConf *configuratio
 		ReadSold(context, db)
 	})
 	engine.GET("/orders", func(context *gin.Context) {
-		ReadOrder(client, context, db)
+		ReadOrder(context, db)
 	})
 
 	// run gateway service

@@ -4,9 +4,8 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 	"gopkg.in/gomail.v2"
-
-	"github.com/ytwxy99/autoCoins/configuration"
 )
 
 const (

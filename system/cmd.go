@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/configuration"
-	"github.com/ytwxy99/autoCoins/gateway"
 	"github.com/ytwxy99/autoCoins/pkg/client"
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
+	"github.com/ytwxy99/autoCoins/pkg/gateway"
 	"github.com/ytwxy99/autoCoins/trade"
 )
 

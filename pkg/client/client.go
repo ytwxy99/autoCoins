@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/gateio/gateapi-go/v6"
-	"github.com/ytwxy99/autoCoins/configuration"
+
+	"github.com/ytwxy99/autoCoins/pkg/configuration"
 )
 
 var Client *gateapi.APIClient
