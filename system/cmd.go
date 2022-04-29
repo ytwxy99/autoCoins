@@ -12,7 +12,7 @@ import (
 	"github.com/ytwxy99/autoCoins/pkg/client"
 	"github.com/ytwxy99/autoCoins/pkg/configuration"
 	"github.com/ytwxy99/autoCoins/pkg/gateway"
-	"github.com/ytwxy99/autoCoins/trade"
+	"github.com/ytwxy99/autoCoins/pkg/trade"
 )
 
 // refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
