@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ytwxy99/autoCoins/system"
+	"github.com/ytwxy99/autoCoins/pkg/system"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 

@@ -3,7 +3,7 @@ package index
 import (
 	"math"
 
-	"github.com/ytwxy99/autoCoins/interfaces"
+	"github.com/ytwxy99/autoCoins/pkg/interfaces"
 	"github.com/ytwxy99/autoCoins/utils"
 )
 
