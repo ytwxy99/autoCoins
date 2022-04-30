@@ -1,7 +1,7 @@
 package index
 
 import (
-	"github.com/ytwxy99/autoCoins/pkg/utils"
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
 type MacdArgs struct {

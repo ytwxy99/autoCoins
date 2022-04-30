@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ytwxy99/autoCoins/pkg/system"
-	"github.com/ytwxy99/autoCoins/pkg/utils"
+	"github.com/ytwxy99/autocoins/pkg/system"
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
 func main() {

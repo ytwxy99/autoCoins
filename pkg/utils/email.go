@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"gopkg.in/gomail.v2"
 )
 

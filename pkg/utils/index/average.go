@@ -3,8 +3,8 @@ package index
 import (
 	"math"
 
-	"github.com/ytwxy99/autoCoins/pkg/interfaces"
-	"github.com/ytwxy99/autoCoins/pkg/utils"
+	"github.com/ytwxy99/autocoins/pkg/interfaces"
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
 type Average struct {

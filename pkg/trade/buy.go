@@ -5,11 +5,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ytwxy99/autoCoins/database"
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
-	"github.com/ytwxy99/autoCoins/pkg/policy"
-	"github.com/ytwxy99/autoCoins/pkg/utils"
-	"github.com/ytwxy99/autoCoins/pkg/utils/index"
+	"github.com/ytwxy99/autocoins/database"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/policy"
+	"github.com/ytwxy99/autocoins/pkg/utils"
+	"github.com/ytwxy99/autocoins/pkg/utils/index"
 )
 
 var target policy.Policy

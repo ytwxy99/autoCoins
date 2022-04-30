@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/pkg/client"
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
-	"github.com/ytwxy99/autoCoins/pkg/gateway"
-	"github.com/ytwxy99/autoCoins/pkg/trade"
+	"github.com/ytwxy99/autocoins/pkg/client"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/gateway"
+	"github.com/ytwxy99/autocoins/pkg/trade"
 )
 
 // refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md

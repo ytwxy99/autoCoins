@@ -7,11 +7,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/database"
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
-	"github.com/ytwxy99/autoCoins/pkg/interfaces"
-	"github.com/ytwxy99/autoCoins/pkg/utils"
-	"github.com/ytwxy99/autoCoins/pkg/utils/index"
+	"github.com/ytwxy99/autocoins/database"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/interfaces"
+	"github.com/ytwxy99/autocoins/pkg/utils"
+	"github.com/ytwxy99/autocoins/pkg/utils/index"
 )
 
 type Cointegration struct{}

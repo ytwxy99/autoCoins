@@ -3,8 +3,8 @@ package database
 import (
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/database/driver"
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/database/driver"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
 )
 
 type DatabaseDrive interface {

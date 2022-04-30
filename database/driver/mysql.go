@@ -6,7 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
 )
 
 type MysqlDrive struct {

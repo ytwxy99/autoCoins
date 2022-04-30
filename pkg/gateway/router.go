@@ -6,7 +6,7 @@ import (
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/gin-gonic/gin"
 
-	"github.com/ytwxy99/autoCoins/pkg/configuration"
+	"github.com/ytwxy99/autocoins/pkg/configuration"
 )
 
 func Router(client *gateapi.APIClient, engine *gin.Engine, sysConf *configuration.SystemConf, db *gorm.DB) {

@@ -1,4 +1,4 @@
-module github.com/ytwxy99/autoCoins
+module github.com/ytwxy99/autocoins
 
 go 1.16
 
@@ -11,6 +11,7 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/mysql v1.3.3
 	gorm.io/driver/sqlite v1.2.6
-	gorm.io/gorm v1.22.4
+	gorm.io/gorm v1.23.1
 )
