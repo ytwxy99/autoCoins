@@ -156,6 +156,10 @@ func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins
 
 		for _, coin := range coins {
 			target := target.Target(db, sysConf, coin).(map[string]string)
+			if len(target) == 0 {
+				continue
+			}
+
 			//NOTE(ytwxy99), do real trade.
 			inOrder := database.InOrder{
 				Contract:  coin,
@@ -174,12 +178,12 @@ func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins
 					logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 					continue
 				}
-				buyCoins <- target
-				logrus.Info("Find it!  to get it : ", coin)
+				logrus.Info("Find it!  to get it : ", target)
 				err = utils.SendMail(sysConf, "交易推荐", "关注币种: "+coin+" 方向："+target[coin])
 				if err != nil {
 					logrus.Error("Send email failed. the err is ", err)
 				}
+				buyCoins <- target
 			}
 		}
 	}

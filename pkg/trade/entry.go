@@ -97,7 +97,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 					c, err := order.FetchOneOrder(db)
 					if c == nil && err != nil {
 						// buy it.
-						go DoTrade(db, sysConf, coin, direction, "cointegration")
+						go DoTrade(db, sysConf, coin, direction, "trend30m")
 					}
 				}
 			}

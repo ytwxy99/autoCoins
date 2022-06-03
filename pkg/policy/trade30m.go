@@ -22,11 +22,12 @@ func (Trend30M) Target(args ...interface{}) interface{} {
 		Interval:     utils.Now,
 		Level:        utils.Level30Min,
 	}).SpotMarket()
+	if sports == nil {
+		return isBuy
+	}
+
 	currentPrice := utils.StringToFloat64(sports[0][2])
-
 	btcRisingCondition := conditionUpMonitor30M(coin, 1.001, currentPrice)
-
-	// for falling market
 	btcFallingCondition := conditionDownMonitor30M(coin, 1.001, currentPrice)
 
 	// rising market buy point
