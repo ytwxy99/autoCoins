@@ -98,13 +98,13 @@ func (*Umbrella) Target(args ...interface{}) interface{} {
 	}
 
 	if float32(countUp)/float32(allUp) > 0.95 && btcRisingCondition && priceRisingCondition && averageDiff(utils.IndexPlatformCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexPlatformCoin, db) {
+		if tradeJugde(utils.IndexPlatformCoin, db, "up") {
 			buyCoins = append(buyCoins, utils.IndexPlatformCoin)
 		}
 	}
 
 	if float32(countDown)/float32(allDown) > 0.95 && btcFallingCondition && priceFallingCondition && averageDiff(utils.IndexPlatformCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexPlatformCoin, db) {
+		if tradeJugde(utils.IndexPlatformCoin, db, "up") {
 			buyCoins = append(buyCoins, utils.IndexPlatformCoin)
 		}
 	}

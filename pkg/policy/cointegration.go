@@ -129,13 +129,13 @@ func (Cointegration) Target(args ...interface{}) interface{} {
 	}
 
 	if float32(countUp)/float32(allUp) > 0.7 && btcRisingCondition && priceRisingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexCoin, db) {
+		if tradeJugde(utils.IndexCoin, db, "up") {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
 
 	if float32(countDown)/float32(allDown) > 0.7 && btcFallingCondition && priceFallingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexCoin, db) {
+		if tradeJugde(utils.IndexCoin, db, "up") {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
@@ -178,10 +178,10 @@ func conditionDownMonitor(coin string, averageDiff float64) bool {
 }
 
 // to judge this coin can be traded or not
-func tradeJugde(coin string, db *gorm.DB) bool {
+func tradeJugde(coin string, db *gorm.DB, direction string) bool {
 	inOrder := database.InOrder{
 		Contract:  coin,
-		Direction: "up",
+		Direction: direction,
 	}
 
 	record, err := inOrder.FetchOneInOrder(db)

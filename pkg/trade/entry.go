@@ -81,21 +81,26 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 	} else if t.Policy == "umbrella" {
 		var buyCoins = make(chan string, 2)
 		DoUmbrella(db, sysConf, buyCoins)
+	} else if t.Policy == "trend30m" {
+		var buyCoins = make(chan map[string]string, 2)
+		FindTrend30MTarget(db, sysConf, buyCoins)
 
-		//for {
-		//	select {
-		//	case coin := <-buyCoins:
-		//		logrus.Info("buy point : ", coin)
-		//		order := database.Order{
-		//			Contract:  coin,
-		//			Direction: "up",
-		//		}
-		//		c, err := order.FetchOneOrder(db)
-		//		if c == nil && err != nil {
-		//			// buy it.
-		//			go DoTrade(db, sysConf, coin, "up", "cointegration", SellPolicy)
-		//		}
-		//	}
-		//}
+		for {
+			select {
+			case coin := <-buyCoins:
+				for coin, direction := range coin {
+					logrus.Info("buy point : ", coin)
+					order := database.Order{
+						Contract:  coin,
+						Direction: direction,
+					}
+					c, err := order.FetchOneOrder(db)
+					if c == nil && err != nil {
+						// buy it.
+						go DoTrade(db, sysConf, coin, direction, "cointegration")
+					}
+				}
+			}
+		}
 	}
 }

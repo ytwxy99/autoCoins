@@ -145,3 +145,42 @@ func DoUmbrella(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- 
 		}
 	}
 }
+
+func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- map[string]string) {
+	target = &policy.Trend30M{}
+	for {
+		coins, err := utils.ReadLines(sysConf.WeightCsv)
+		if err != nil {
+			logrus.Error("read weight csv failed, err is ", err)
+		}
+
+		for _, coin := range coins {
+			target := target.Target(db, sysConf, coin).(map[string]string)
+			//NOTE(ytwxy99), do real trade.
+			inOrder := database.InOrder{
+				Contract:  coin,
+				Direction: target[coin],
+			}
+
+			record, err := inOrder.FetchOneInOrder(db)
+			if err != nil {
+				logrus.Info("Can't find : ", coin)
+			}
+
+			if record == nil {
+				// do buy
+				err = (&inOrder).AddInOrder(db)
+				if err != nil {
+					logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
+					continue
+				}
+				buyCoins <- target
+				logrus.Info("Find it!  to get it : ", coin)
+				err = utils.SendMail(sysConf, "交易推荐", "关注币种: "+coin+" 方向："+target[coin])
+				if err != nil {
+					logrus.Error("Send email failed. the err is ", err)
+				}
+			}
+		}
+	}
+}

@@ -126,6 +126,22 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		},
 	}
 
+	// use trend policy
+	var trend30mCmd = &cobra.Command{
+		Use:   "trend30min [string to echo]",
+		Short: "Using trend to do a trade",
+		Run: func(cmd *cobra.Command, args []string) {
+			logrus.Info("market quotations is comming ！ get it !")
+
+			for {
+				t := &trade.Trade{
+					Policy: "trend30m",
+				}
+				t.Entry(db, sysConf)
+			}
+		},
+	}
+
 	var rootCmd = &cobra.Command{Use: "autoCoin"}
 	rootCmd.AddCommand(InitCmd)
 	rootCmd.AddCommand(GateWayCmd)
@@ -133,5 +149,6 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	tradeCmd.AddCommand(trendCmd)
 	tradeCmd.AddCommand(cointegrationCmd)
 	tradeCmd.AddCommand(umbrellaCmd)
+	tradeCmd.AddCommand(trend30mCmd)
 	rootCmd.Execute()
 }

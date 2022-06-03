@@ -152,6 +152,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 					soldCoins.Account = "spot"
 					soldCoins.Side = "sell"
 					soldCoins.Iceberg = "0"
+					soldCoins.Direction = direction
 				}
 
 				inOrder := &database.InOrder{
@@ -170,6 +171,11 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				if policy == "cointegration" {
 					body := utils.Down + coin
 					utils.SendMail(sysConf, utils.ClearOrder, body)
+				} else if policy == "trend30m" {
+					err = utils.SendMail(sysConf, "建议卖出", "关注币种: "+coin+" 方向："+direction)
+					if err != nil {
+						logrus.Error("Send email failed. the err is ", err)
+					}
 				}
 				break // this trade is over, break 'for{}'
 			}

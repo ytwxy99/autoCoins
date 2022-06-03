@@ -20,6 +20,117 @@ type Average struct {
  */
 func (average *Average) Average(backOff bool) float64 {
 	var sum float64
+
+	// for 30min
+	if average.MA == utils.MA21 && average.Level == utils.Level30Min {
+		intervel := math.Ceil(float64(-average.MA/48)) - 1 //向上取整
+		if !backOff {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA : len(markets)] {
+				sum = sum + utils.StringToFloat64(market[2])
+			}
+
+			return sum / float64(average.MA)
+		} else {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA-1 : len(markets)-1] {
+				sum = sum + utils.StringToFloat64(market[2])
+			}
+
+			return sum / float64(average.MA)
+		}
+	} else if average.MA == utils.MA10 && average.Level == utils.Level30Min {
+		intervel := math.Ceil(float64(-4*average.MA/24)) - 1 //向上取整
+		if !backOff {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA : len(markets)] {
+				sum = sum + utils.StringToFloat64(market[2])
+
+			}
+
+			return sum / float64(average.MA)
+		} else {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA-1 : len(markets)-1] {
+				sum = sum + utils.StringToFloat64(market[2])
+			}
+
+			return sum / float64(average.MA)
+		}
+	} else if average.MA == utils.MA5 && average.Level == utils.Level30Min {
+		intervel := math.Ceil(float64(-4*average.MA/24)) - 1 //向上取整
+		if !backOff {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA : len(markets)] {
+				sum = sum + utils.StringToFloat64(market[2])
+			}
+
+			return sum / float64(average.MA)
+		} else {
+			markets := (&interfaces.MarketArgs{
+				CurrencyPair: average.CurrencyPair,
+				Interval:     int(intervel),
+				Level:        average.Level,
+			}).SpotMarket()
+
+			if markets == nil {
+				return 0
+			}
+
+			for _, market := range markets[len(markets)-average.MA-1 : len(markets)-1] {
+				sum = sum + utils.StringToFloat64(market[2])
+			}
+
+			return sum / float64(average.MA)
+		}
+	}
+
+	// for 4h
 	if average.MA == utils.MA21 && average.Level == utils.Level4Hour {
 		intervel := math.Ceil(float64(-4*average.MA/24)) - 1 //向上取整
 		if !backOff {

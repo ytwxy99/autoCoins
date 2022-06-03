@@ -153,7 +153,100 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 			}
 			return false
 		}
-	} else {
-		return false
+	} else if sellArgs.Policy == "trend30m" {
+		average := &index.Average{
+			CurrencyPair: sellArgs.Contract,
+			Level:        utils.Level30Min,
+			MA:           utils.MA21,
+		}
+
+		sports := (&interfaces.MarketArgs{
+			CurrencyPair: average.CurrencyPair,
+			Interval:     utils.Now,
+			Level:        utils.Level30Min,
+		}).SpotMarket()
+		currentPrice := utils.StringToFloat64(sports[0][2])
+
+		order, err := (&database.Order{
+			Contract:  sellArgs.Contract,
+			Direction: sellArgs.OrderDirection,
+		}).FetchOneOrder(sellArgs.db)
+		if err != nil {
+			logrus.Error("fetch orders failed: ", err)
+			return false
+		}
+
+		// for rising
+		if sellArgs.OrderDirection == utils.DirectionUp {
+			r1 := average.Average(false) <= average.Average(true)
+			r2 := order != nil && currentPrice*1.01 <= utils.StringToFloat64(order.Price)
+			r3 := currentPrice < average.Average(false)
+
+			average.MA = utils.MA5
+			r4 := average.Average(false) <= average.Average(true)
+
+			if r1 || r2 || r3 || r4 {
+				// do sell
+				if order != nil {
+					sold := &database.Sold{
+						Contract:        sellArgs.Contract,
+						Price:           utils.Float32ToString(float32(currentPrice)),
+						Volume:          0,
+						Time:            utils.GetNowTimeStamp(),
+						Profit:          float32(currentPrice) - utils.StringToFloat32(order.Price),
+						Relative_profit: utils.Float32ToString((float32(currentPrice) - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100),
+						Test:            "test-order",
+						Status:          "close",
+						Typee:           "limit",
+						Account:         "spot",
+						Side:            "sell",
+						Iceberg:         "0",
+					}
+					if err := sold.AddSold(sellArgs.db); err != nil {
+						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
+						return false
+					}
+				}
+
+				return true
+			}
+		} else if sellArgs.OrderDirection == utils.DirectionDown {
+			// for falling
+			average.MA = utils.MA21
+			f1 := average.Average(false) >= average.Average(true)
+			f2 := order != nil && currentPrice >= utils.StringToFloat64(order.Price)*1.01
+			f3 := currentPrice > average.Average(false)
+
+			average.MA = utils.MA5
+			f4 := average.Average(false) >= average.Average(true)
+
+			if f1 || f2 || f3 || f4 {
+				// do sell
+				if order != nil {
+					sold := &database.Sold{
+						Contract:        sellArgs.Contract,
+						Price:           utils.Float32ToString(float32(currentPrice)),
+						Volume:          0,
+						Time:            utils.GetNowTimeStamp(),
+						Profit:          float32(currentPrice) - utils.StringToFloat32(order.Price),
+						Relative_profit: utils.Float32ToString((float32(currentPrice) - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100),
+						Test:            "test-order",
+						Status:          "close",
+						Typee:           "limit",
+						Account:         "spot",
+						Side:            "sell",
+						Iceberg:         "0",
+					}
+					if err := sold.AddSold(sellArgs.db); err != nil {
+						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
+						return false
+					}
+				}
+
+				return true
+			}
+		}
 	}
+
+	return false
 }

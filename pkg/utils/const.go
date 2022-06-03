@@ -13,6 +13,7 @@ const (
 	MA10              = 10
 	MA21              = 21
 	Level15Min        = "15m"
+	Level30Min        = "30m"
 	Level4Hour        = "4h"
 	Level8Hour        = "8h"
 	Level1Day         = "1d"
