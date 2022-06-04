@@ -83,21 +83,21 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 		DoUmbrella(db, sysConf, buyCoins)
 	} else if t.Policy == "trend30m" {
 		var buyCoins = make(chan map[string]string, 2)
-		FindTrend30MTarget(db, sysConf, buyCoins)
+		go FindTrend30MTarget(db, sysConf, buyCoins)
 
 		for {
 			select {
 			case coin := <-buyCoins:
-				for coin, direction := range coin {
+				for cn, direction := range coin {
 					logrus.Info("buy point : ", coin)
 					order := database.Order{
-						Contract:  coin,
+						Contract:  cn,
 						Direction: direction,
 					}
 					c, err := order.FetchOneOrder(db)
 					if c == nil && err != nil {
 						// buy it.
-						go DoTrade(db, sysConf, coin, direction, "trend30m")
+						go DoTrade(db, sysConf, cn, direction, "trend30m")
 					}
 				}
 			}

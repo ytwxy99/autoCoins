@@ -132,13 +132,10 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Using trend to do a trade",
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
-
-			for {
-				t := &trade.Trade{
-					Policy: "trend30m",
-				}
-				t.Entry(db, sysConf)
+			t := &trade.Trade{
+				Policy: "trend30m",
 			}
+			t.Entry(db, sysConf)
 		},
 	}
 
