@@ -43,7 +43,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 	for {
 		od := database.Order{
 			Contract:  coin,
-			Direction: "up",
+			Direction: direction,
 		}
 		order, _ := od.FetchOneOrder(db)
 
@@ -244,12 +244,21 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				}
 				buyPrice := currentCoin[0].Last
 
-				if buyPrice <= price {
+				if buyPrice <= price && direction == utils.DirectionUp {
 					logrus.WithFields(logrus.Fields{
 						"coin":     coin,
 						"price":    price,
 						"buyPrice": buyPrice,
 					}).Info("Price decline, trade it later: ")
+					continue
+				}
+
+				if buyPrice >= price && direction == utils.DirectionDown {
+					logrus.WithFields(logrus.Fields{
+						"coin":     coin,
+						"price":    price,
+						"buyPrice": buyPrice,
+					}).Info("Price rising, trade it later: ")
 					continue
 				}
 
