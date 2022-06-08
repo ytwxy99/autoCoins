@@ -14,7 +14,7 @@ func (order *Order) AddOrder(db *gorm.DB) error {
 
 // fetch one order by contract and ditection
 func (order Order) FetchOneOrder(db *gorm.DB) (*Order, error) {
-	db.Table("order").
+	db.Table("orders").
 		Where("contract = ? AND direction = ?", order.Contract, order.Direction).First(&order)
 
 	if order.ID == 0 {
