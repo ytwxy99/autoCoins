@@ -165,6 +165,10 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 			Interval:     utils.Now,
 			Level:        utils.Level30Min,
 		}).SpotMarket()
+		if sports == nil {
+			logrus.Error("fetch market failed: ")
+			return false
+		}
 		currentPrice := utils.StringToFloat64(sports[0][2])
 
 		order, err := (&database.Order{

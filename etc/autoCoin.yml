@@ -20,7 +20,7 @@ options:
 
 email:
   user: "autocoins@163.com"
-  password : "FHYKNBEUYNBYRGAU"
+  password : "KFTNGZKQKMWANUTJ"
   host: "smtp.163.com"
   port: "465"
   mailTo: ["524737353@qq.com", "415255404@qq.com", "1459884266@qq.com"]
