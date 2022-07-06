@@ -7,17 +7,14 @@ import (
 
 	"github.com/gateio/gateapi-go/v6"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-
 	"github.com/ytwxy99/autocoins/database"
 	"github.com/ytwxy99/autocoins/pkg/client"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
-func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
-	//var historyDay *database.HistoryDay
+// InitTrendPairs fetch trend coins
+func InitTrendPairs(ctx context.Context, pairs []gateapi.CurrencyPair) error {
 	coins := []string{}
 	for _, pair := range pairs {
 		// just record coin which is tradable
@@ -38,10 +35,10 @@ func InitTrendPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) 
 		}
 	}
 
-	return utils.WriteLines(coins, filePath)
+	return utils.WriteLines(coins, utils.GetSystemConfContext(ctx).TrendCsv)
 }
 
-func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *gorm.DB) error {
+func InitCointegrationPairs(ctx context.Context, pairs []gateapi.CurrencyPair) error {
 	var historyDay *database.HistoryDay
 	coins := []string{}
 	for _, pair := range pairs {
@@ -69,7 +66,7 @@ func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *g
 					Price:    value[2],
 				}
 
-				err = historyDay.AddHistoryDay(db)
+				err = historyDay.AddHistoryDay(utils.GetDBContext(ctx))
 				if err != nil {
 					if err.Error() != utils.DBHistoryDayUniq {
 						logrus.Error("add HistoryDay record error: %v\n", err)
@@ -83,10 +80,11 @@ func InitCointegrationPairs(pairs []gateapi.CurrencyPair, filePath string, db *g
 		}
 	}
 
-	return utils.WriteLines(coins, filePath)
+	return utils.WriteLines(coins, utils.GetSystemConfContext(ctx).CointCsv)
 }
 
-func InitCointegration(sysConf *configuration.SystemConf) error {
+func InitCointegration(ctx context.Context) error {
+	sysConf := utils.GetSystemConfContext(ctx)
 	args := []string{
 		sysConf.CointegrationSrcipt, // index 0
 		sysConf.CointCsv,            // index 1
@@ -109,7 +107,8 @@ func InitCointegration(sysConf *configuration.SystemConf) error {
 	return nil
 }
 
-func InitFutures(ctx context.Context, coinCsv string) error {
+// InitFutures init future coins into Umbrella.csv
+func InitFutures(ctx context.Context) error {
 	coins := []string{}
 	futures, err := (&interfaces.Future{
 		Settle: client.Settle,
@@ -122,14 +121,21 @@ func InitFutures(ctx context.Context, coinCsv string) error {
 		coins = append(coins, future.Name)
 	}
 
-	return utils.WriteLines(coins, coinCsv)
+	return utils.WriteLines(coins, utils.GetSystemConfContext(ctx).UmbrellaCsv)
 }
 
-// init system base data
-func Init(authConf *configuration.GateAPIV4, sysConf *configuration.SystemConf) {
+//Init system base data
+func Init() {
+	authConf, _ := utils.ReadGateAPIV4("./etc/auth.yml")
+	sysConf, _ := utils.ReadSystemConfig("./etc/autoCoin.yml")
 	_, ctx := client.GetClient(authConf)
 	utils.InitLog(sysConf.LogPath)
 	db := database.GetDB(sysConf)
 	database.InitDB(db)
-	InitCmd(ctx, sysConf, db)
+
+	ctxMetadata := utils.SystemContext{
+		SystemConf: sysConf,
+		Database:   db,
+	}
+	InitCmd(utils.SetContextValue(ctx, "ctxMetadata", ctxMetadata), sysConf, db)
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/ytwxy99/autocoins/pkg/configuration"
 )
 
-// read Key&Secret from yaml
+//ReadGateAPIV4 read Key&Secret from yaml
 func ReadGateAPIV4(filePath string) (*configuration.GateAPIV4, error) {
 	var gateAPIV4 configuration.GateAPIV4
 	value, err := os.Open(filePath)
@@ -27,7 +27,7 @@ func ReadGateAPIV4(filePath string) (*configuration.GateAPIV4, error) {
 	return &gateAPIV4, nil
 }
 
-// read system configure
+//ReadSystemConfig read system configure
 func ReadSystemConfig(filePath string) (*configuration.SystemConf, error) {
 	var sysConf configuration.SystemConf
 	yamlFile, err := ioutil.ReadFile(filePath)
