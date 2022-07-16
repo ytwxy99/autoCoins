@@ -15,9 +15,7 @@ type condition struct {
 }
 
 // Target find macd buy point
-func (*MacdPolicy) Target(args ...interface{}) interface{} {
-	// convert specified type
-	ctx := args[0].(context.Context)
+func (*MacdPolicy) Target(ctx context.Context) interface{} {
 	coin := ctx.Value("coin").(string)
 
 	market4H := (&interfaces.MarketArgs{

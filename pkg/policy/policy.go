@@ -1,5 +1,7 @@
 package policy
 
+import "context"
+
 type Policy interface {
-	Target(args ...interface{}) interface{}
+	Target(ctx context.Context) interface{}
 }

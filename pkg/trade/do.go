@@ -7,7 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/ytwxy99/autocoins/database"
 	"github.com/ytwxy99/autocoins/pkg/client"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
@@ -21,7 +20,7 @@ type Session struct {
 
 // Sells, adjusts TP and SL according to trailing values
 // and buys new coins
-func DoTrade(ctx context.Context, sysConf *configuration.SystemConf, coin string, direction string, policy string) {
+func DoTrade(ctx context.Context, coin string, direction string, policy string) {
 	// set necessary vars
 	var volume float32
 	var amount float32
@@ -32,6 +31,8 @@ func DoTrade(ctx context.Context, sysConf *configuration.SystemConf, coin string
 	var orderCoins database.Order
 	var soldCoins database.Sold
 	var session Session
+
+	sysConf := utils.GetSystemConfContext(ctx)
 
 	tp := sysConf.Options.Tp
 	sl := sysConf.Options.Sl

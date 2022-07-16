@@ -17,8 +17,6 @@ type Trade struct {
 
 // Entry trade entry point
 func (t *Trade) Entry(ctx context.Context) {
-	sysConf := utils.GetSystemConfContext(ctx)
-
 	var buyCoins = make(chan string, 2)
 	// use all cpus
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -29,7 +27,7 @@ func (t *Trade) Entry(ctx context.Context) {
 	}()
 
 	if t.Policy == utils.Trend {
-		coins, err := utils.ReadLines(sysConf.TrendCsv)
+		coins, err := utils.ReadLines(utils.GetSystemConfContext(ctx).TrendCsv)
 		if err != nil {
 			logrus.Error("Read local file error: %v", err)
 			return
@@ -37,9 +35,9 @@ func (t *Trade) Entry(ctx context.Context) {
 
 		for i := 0; i < (len(coins)/10 + 1); i++ {
 			if i == len(coins)/10 {
-				go FindTrendTarget(ctx, sysConf, coins[i*10:i*10+len(coins)%10], buyCoins)
+				go FindTrendTarget(ctx, coins[i*10:i*10+len(coins)%10], buyCoins)
 			} else {
-				go FindTrendTarget(ctx, sysConf, coins[i*10:i*10+9], buyCoins)
+				go FindTrendTarget(ctx, coins[i*10:i*10+9], buyCoins)
 			}
 		}
 
@@ -54,14 +52,14 @@ func (t *Trade) Entry(ctx context.Context) {
 				c, err := order.FetchOneOrder(ctx)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(ctx, sysConf, coin, "up", "trend")
+					go DoTrade(ctx, coin, "up", "trend")
 				}
 			}
 		}
 
 	} else if t.Policy == utils.Coint {
 		var buyCoins = make(chan string, 2)
-		go DoCointegration(ctx, sysConf, buyCoins)
+		go DoCointegration(ctx, buyCoins)
 
 		for {
 			select {
@@ -74,13 +72,13 @@ func (t *Trade) Entry(ctx context.Context) {
 				c, err := order.FetchOneOrder(ctx)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(ctx, sysConf, coin, "up", "cointegration")
+					go DoTrade(ctx, coin, "up", "cointegration")
 				}
 			}
 		}
 	} else if t.Policy == utils.Trend30Min {
 		var buyCoins = make(chan map[string]string, 2)
-		go FindTrend30MTarget(ctx, sysConf, buyCoins)
+		go FindTrend30MTarget(ctx, buyCoins)
 
 		for {
 			select {
@@ -94,7 +92,7 @@ func (t *Trade) Entry(ctx context.Context) {
 					c, err := order.FetchOneOrder(ctx)
 					if c == nil && err != nil {
 						// buy it.
-						go DoTrade(ctx, sysConf, cn, direction, "trend30m")
+						go DoTrade(ctx, cn, direction, "trend30m")
 					}
 				}
 			}

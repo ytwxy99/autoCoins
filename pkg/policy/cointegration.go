@@ -15,9 +15,7 @@ import (
 type Cointegration struct{}
 
 // Target cointegration policy
-func (Cointegration) Target(args ...interface{}) interface{} {
-	ctx := args[0].(context.Context)
-
+func (Cointegration) Target(ctx context.Context) interface{} {
 	buyCoins := []string{}
 	sortCoins := map[string]float32{}
 	conditions := map[string]bool{}

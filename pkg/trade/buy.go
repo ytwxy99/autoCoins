@@ -13,7 +13,7 @@ import (
 
 var target policy.Policy
 
-func FindTrendTarget(ctx context.Context, sysConf *configuration.SystemConf, coins []string, buyCoins chan<- string) {
+func FindTrendTarget(ctx context.Context, coins []string, buyCoins chan<- string) {
 	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {
@@ -39,7 +39,7 @@ func FindTrendTarget(ctx context.Context, sysConf *configuration.SystemConf, coi
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
-					err = utils.SendMail(sysConf, "趋势策略", "关注币种: "+coin)
+					err = utils.SendMail(utils.GetSystemConfContext(ctx), "趋势策略", "关注币种: "+coin)
 					if err != nil {
 						logrus.Error("Send email failed. the err is ", err)
 					}
@@ -50,7 +50,7 @@ func FindTrendTarget(ctx context.Context, sysConf *configuration.SystemConf, coi
 	}
 }
 
-func DoCointegration(ctx context.Context, sysConf *configuration.SystemConf, buyCoins chan<- string) {
+func DoCointegration(ctx context.Context, buyCoins chan<- string) {
 	var body string
 	target = &policy.Cointegration{}
 	i := 0
@@ -90,7 +90,7 @@ func DoCointegration(ctx context.Context, sysConf *configuration.SystemConf, buy
 					}
 					buyCoins <- coin
 					logrus.Info("Find it!  to get it : ", coin)
-					err = utils.SendMail(sysConf, utils.BtcPolicy, body)
+					err = utils.SendMail(utils.GetSystemConfContext(ctx), utils.BtcPolicy, body)
 					if err != nil {
 						logrus.Error("Send email failed. the err is ", err)
 					}
@@ -145,10 +145,10 @@ func DoUmbrella(ctx context.Context, sysConf *configuration.SystemConf, buyCoins
 	}
 }
 
-func FindTrend30MTarget(ctx context.Context, sysConf *configuration.SystemConf, buyCoins chan<- map[string]string) {
+func FindTrend30MTarget(ctx context.Context, buyCoins chan<- map[string]string) {
 	target = &policy.Trend30M{}
 	for {
-		coins, err := utils.ReadLines(sysConf.WeightCsv)
+		coins, err := utils.ReadLines(utils.GetSystemConfContext(ctx).WeightCsv)
 		if err != nil {
 			logrus.Error("read weight csv failed, err is ", err)
 		}
@@ -178,7 +178,7 @@ func FindTrend30MTarget(ctx context.Context, sysConf *configuration.SystemConf, 
 					continue
 				}
 				logrus.Info("Find it!  to get it : ", target)
-				err = utils.SendMail(sysConf, "交易推荐", "关注币种: "+coin+" 方向："+target[coin])
+				err = utils.SendMail(utils.GetSystemConfContext(ctx), "交易推荐", "关注币种: "+coin+" 方向："+target[coin])
 				if err != nil {
 					logrus.Error("Send email failed. the err is ", err)
 				}

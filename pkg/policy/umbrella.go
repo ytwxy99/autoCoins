@@ -13,9 +13,7 @@ import (
 
 type Umbrella struct{}
 
-func (*Umbrella) Target(args ...interface{}) interface{} {
-	ctx := args[0].(context.Context)
-
+func (*Umbrella) Target(ctx context.Context) interface{} {
 	buyCoins := []string{}
 	conditions := map[string]bool{}
 

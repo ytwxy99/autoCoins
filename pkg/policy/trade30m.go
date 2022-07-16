@@ -10,9 +10,8 @@ import (
 type Trend30M struct{}
 
 // Target cointegration policy
-func (Trend30M) Target(args ...interface{}) interface{} {
+func (Trend30M) Target(ctx context.Context) interface{} {
 	isBuy := map[string]string{}
-	ctx := args[0].(context.Context)
 	coin := ctx.Value("coin").(string)
 
 	sports := (&interfaces.MarketArgs{
