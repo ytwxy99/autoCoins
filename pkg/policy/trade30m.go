@@ -24,11 +24,11 @@ func (Trend30M) Target(ctx context.Context) interface{} {
 	}
 
 	currentPrice := utils.StringToFloat64(sports[0][2])
-	btcRisingCondition := conditionUpMonitor30M(coin, 1.001, currentPrice)
-	btcFallingCondition := conditionDownMonitor30M(coin, 1.001, currentPrice)
+	risingCondition := conditionUpMonitor30M(coin, 1.001, currentPrice)
+	fallingCondition := conditionDownMonitor30M(coin, 1.001, currentPrice)
 
 	// rising market buy point
-	if btcRisingCondition {
+	if risingCondition {
 		if tradeJugde(ctx, coin, "up") {
 			isBuy[coin] = utils.DirectionUp
 			return isBuy
@@ -37,7 +37,7 @@ func (Trend30M) Target(ctx context.Context) interface{} {
 	}
 
 	// falling market buy point
-	if btcFallingCondition {
+	if fallingCondition {
 		if tradeJugde(ctx, coin, "down") {
 			isBuy[coin] = utils.DirectionDown
 			return isBuy
