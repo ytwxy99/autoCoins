@@ -1,8 +1,7 @@
 package policy
 
 import (
-	"gorm.io/gorm"
-
+	"context"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
@@ -10,12 +9,11 @@ import (
 
 type Trend30M struct{}
 
-// cointegration policy
+// Target cointegration policy
 func (Trend30M) Target(args ...interface{}) interface{} {
 	isBuy := map[string]string{}
-	db := args[0].(*gorm.DB)
-	//sysConf := args[1].(*configuration.SystemConf)
-	coin := args[2].(string)
+	ctx := args[0].(context.Context)
+	coin := ctx.Value("coin").(string)
 
 	sports := (&interfaces.MarketArgs{
 		CurrencyPair: coin,
@@ -32,7 +30,7 @@ func (Trend30M) Target(args ...interface{}) interface{} {
 
 	// rising market buy point
 	if btcRisingCondition {
-		if tradeJugde(coin, db, "up") {
+		if tradeJugde(ctx, coin, "up") {
 			isBuy[coin] = utils.DirectionUp
 			return isBuy
 		}
@@ -41,7 +39,7 @@ func (Trend30M) Target(args ...interface{}) interface{} {
 
 	// falling market buy point
 	if btcFallingCondition {
-		if tradeJugde(coin, db, "down") {
+		if tradeJugde(ctx, coin, "down") {
 			isBuy[coin] = utils.DirectionDown
 			return isBuy
 		}

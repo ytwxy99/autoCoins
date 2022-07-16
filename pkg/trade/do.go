@@ -1,11 +1,10 @@
 package trade
 
 import (
+	"context"
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-
 	"github.com/ytwxy99/autocoins/database"
 	"github.com/ytwxy99/autocoins/pkg/client"
 	"github.com/ytwxy99/autocoins/pkg/configuration"
@@ -22,7 +21,7 @@ type Session struct {
 
 // Sells, adjusts TP and SL according to trailing values
 // and buys new coins
-func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direction string, policy string) {
+func DoTrade(ctx context.Context, sysConf *configuration.SystemConf, coin string, direction string, policy string) {
 	// set necessary vars
 	var volume float32
 	var amount float32
@@ -45,7 +44,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 			Contract:  coin,
 			Direction: direction,
 		}
-		order, _ := od.FetchOneOrder(db)
+		order, _ := od.FetchOneOrder(ctx)
 
 		if order != nil {
 			if tp == 0 {
@@ -86,7 +85,6 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 			sellArgs := &SellArgs{
 				Contract:       orderCoins.Contract,
 				Policy:         policy,
-				db:             db,
 				LastPrice:      lastPrice,
 				StoredPrice:    storedPrice,
 				OrderDirection: direction,
@@ -107,13 +105,12 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				order.Sl = newSl
 
 				//NOTE(ytwxy99), update order tp and sl into database
-				order.UpdateOrder(db)
+				order.UpdateOrder(ctx)
 				newTopPrice := storedPrice + (storedPrice * newTp / 100)
 				newStopPrice := storedPrice + (storedPrice * newSl / 100)
 				logrus.Infof("updated tp: %v, new_top_price: %v", newTp, newTopPrice)
 				logrus.Infof("updated sl: %v, new_stop_price: %v", newSl, newStopPrice)
-				//} else if lastPrice < (storedPrice + storedPrice*order.Sl/100) {
-			} else if sellArgs.SellPolicy() {
+			} else if sellArgs.SellPolicy(ctx) {
 				// sell coin
 				// TODO(ytwxy99), why do it by this way？
 				fees := order.Fee
@@ -131,7 +128,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 				}
 
 				logrus.Infof("Sold %v with: price is %v; profit is %v% .", order.Contract, lastPrice, (lastPrice-storedPrice)/storedPrice*100)
-				err = order.DeleteOrder(db)
+				err = order.DeleteOrder(ctx)
 				if err != nil {
 					logrus.Errorf("delete Order error : %v , Sold is %v:", err, order)
 				}
@@ -159,11 +156,11 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 					Contract:  coin,
 					Direction: direction,
 				}
-				err = inOrder.DeleteInOrder(db)
+				err = inOrder.DeleteInOrder(ctx)
 				if err != nil {
 					logrus.Errorf("delete inOrder error : %v , inOrder is %v:", err, inOrder)
 				}
-				err = soldCoins.AddSold(db)
+				err = soldCoins.AddSold(ctx)
 				if err != nil {
 					logrus.Errorf("add Sold error : %v , Sold is %v:", err, soldCoins)
 				}
@@ -334,7 +331,7 @@ func DoTrade(db *gorm.DB, sysConf *configuration.SystemConf, coin string, direct
 					"status": orderCoins.Status,
 				}).Info("Order created at a price of each: ")
 
-				orderCoins.AddOrder(db)
+				orderCoins.AddOrder(ctx)
 			} else {
 				if orderCoins.Status == "cancelled" && orderCoins.Amount > orderCoins.Left && orderCoins.Left > 0 {
 					// partial order. Change qty and fee_total in order and finish any remaining balance

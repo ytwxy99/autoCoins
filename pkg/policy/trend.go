@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"context"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
@@ -13,10 +14,11 @@ type condition struct {
 	dataMacd4H  []map[string]string
 }
 
-// find macd buy point
+// Target find macd buy point
 func (*MacdPolicy) Target(args ...interface{}) interface{} {
 	// convert specified type
-	coin := args[0].(string)
+	ctx := args[0].(context.Context)
+	coin := ctx.Value("coin").(string)
 
 	market4H := (&interfaces.MarketArgs{
 		CurrencyPair: coin,

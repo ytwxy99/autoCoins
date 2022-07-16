@@ -1,11 +1,10 @@
 package trade
 
 import (
+	"context"
 	"math"
 
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-
 	"github.com/ytwxy99/autocoins/database"
 	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
@@ -16,14 +15,13 @@ import (
 type SellArgs struct {
 	Policy         string
 	Contract       string
-	db             *gorm.DB
 	LastPrice      float32
 	StoredPrice    float32
 	OrderDirection string
 	sysConfig      *configuration.SystemConf
 }
 
-func (sellArgs *SellArgs) SellPolicy() bool {
+func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 	if sellArgs.Policy == "trend" {
 		// sell specify coin when the absolute value of rising or falling rate over 15%.
 		return math.Abs(float64((sellArgs.LastPrice-sellArgs.StoredPrice)/sellArgs.StoredPrice)) >= 15
@@ -32,7 +30,7 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 		order, err := (database.Order{
 			Contract:  sellArgs.Contract,
 			Direction: sellArgs.OrderDirection,
-		}).FetchOneOrder(sellArgs.db)
+		}).FetchOneOrder(ctx)
 		if err != nil {
 			logrus.Error("Can't find coin in Order record, then trade will be canceled : ", sellArgs.Contract)
 			return false
@@ -174,7 +172,7 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 		order, err := (&database.Order{
 			Contract:  sellArgs.Contract,
 			Direction: sellArgs.OrderDirection,
-		}).FetchOneOrder(sellArgs.db)
+		}).FetchOneOrder(ctx)
 		if err != nil {
 			logrus.Error("fetch orders failed: ", err)
 			return false
@@ -206,7 +204,7 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 						Side:            "sell",
 						Iceberg:         "0",
 					}
-					if err := sold.AddSold(sellArgs.db); err != nil {
+					if err := sold.AddSold(ctx); err != nil {
 						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
 						return false
 					}
@@ -241,7 +239,7 @@ func (sellArgs *SellArgs) SellPolicy() bool {
 						Side:            "sell",
 						Iceberg:         "0",
 					}
-					if err := sold.AddSold(sellArgs.db); err != nil {
+					if err := sold.AddSold(ctx); err != nil {
 						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
 						return false
 					}

@@ -1,8 +1,7 @@
 package trade
 
 import (
-	"gorm.io/gorm"
-
+	"context"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ytwxy99/autocoins/database"
@@ -14,11 +13,11 @@ import (
 
 var target policy.Policy
 
-func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []string, buyCoins chan<- string) {
+func FindTrendTarget(ctx context.Context, sysConf *configuration.SystemConf, coins []string, buyCoins chan<- string) {
 	target = &policy.MacdPolicy{}
 	for {
 		for _, coin := range coins {
-			condition := target.Target(coin).(bool)
+			condition := target.Target(utils.SetContextValue(ctx, "coin", coin)).(bool)
 			if condition {
 				//NOTE(ytwxy99), do real trade.
 				inOrder := database.InOrder{
@@ -26,14 +25,14 @@ func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []str
 					Direction: utils.DirectionUp,
 				}
 
-				record, err := inOrder.FetchOneInOrder(db)
+				record, err := inOrder.FetchOneInOrder(ctx)
 				if err != nil {
 					logrus.Info("Can't find : ", coin)
 				}
 
 				if record == nil {
 					// do buy
-					err = (&inOrder).AddInOrder(db)
+					err = (&inOrder).AddInOrder(ctx)
 					if err != nil {
 						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 						continue
@@ -51,12 +50,12 @@ func FindTrendTarget(db *gorm.DB, sysConf *configuration.SystemConf, coins []str
 	}
 }
 
-func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- string) {
+func DoCointegration(ctx context.Context, sysConf *configuration.SystemConf, buyCoins chan<- string) {
 	var body string
 	target = &policy.Cointegration{}
 	i := 0
 	for i < 1 {
-		coins := target.Target(db, sysConf).([]string)
+		coins := target.Target(ctx).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
 				// fetch the 21 interval average of 4h
@@ -77,14 +76,14 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 					inOrder.Direction = utils.DirectionDown
 				}
 
-				record, err := inOrder.FetchOneInOrder(db)
+				record, err := inOrder.FetchOneInOrder(ctx)
 				if err != nil {
 					logrus.Info("Can't find in inOrder record, then will be traded : ", coin)
 				}
 
 				if record == nil {
 					// do buy
-					err = (&inOrder).AddInOrder(db)
+					err = (&inOrder).AddInOrder(ctx)
 					if err != nil {
 						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 						continue
@@ -101,14 +100,14 @@ func DoCointegration(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins ch
 	}
 }
 
-func DoUmbrella(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- string) {
+func DoUmbrella(ctx context.Context, sysConf *configuration.SystemConf, buyCoins chan<- string) {
 	var body string
 	var sends []string
 
 	i := 0
 	for i < 1 {
 		target = &policy.Umbrella{}
-		coins := target.Target(db, sysConf).([]string)
+		coins := target.Target(ctx).([]string)
 		if len(coins) != 0 {
 			for _, coin := range coins {
 				//NOTE(ytwxy99), do real trade.
@@ -117,14 +116,14 @@ func DoUmbrella(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- 
 					Direction: "up",
 				}
 
-				record, err := inOrder.FetchOneInOrder(db)
+				record, err := inOrder.FetchOneInOrder(ctx)
 				if err != nil {
 					logrus.Info("Can't find in inOrder record, then will be traded : ", coin)
 				}
 
 				if record == nil {
 					// do buy
-					err = (&inOrder).AddInOrder(db)
+					err = (&inOrder).AddInOrder(ctx)
 					if err != nil {
 						logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 						continue
@@ -146,7 +145,7 @@ func DoUmbrella(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- 
 	}
 }
 
-func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins chan<- map[string]string) {
+func FindTrend30MTarget(ctx context.Context, sysConf *configuration.SystemConf, buyCoins chan<- map[string]string) {
 	target = &policy.Trend30M{}
 	for {
 		coins, err := utils.ReadLines(sysConf.WeightCsv)
@@ -155,7 +154,7 @@ func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins
 		}
 
 		for _, coin := range coins {
-			target := target.Target(db, sysConf, coin).(map[string]string)
+			target := target.Target(utils.SetContextValue(ctx, "coin", coin)).(map[string]string)
 			if len(target) == 0 {
 				continue
 			}
@@ -166,14 +165,14 @@ func FindTrend30MTarget(db *gorm.DB, sysConf *configuration.SystemConf, buyCoins
 				Direction: target[coin],
 			}
 
-			record, err := inOrder.FetchOneInOrder(db)
+			record, err := inOrder.FetchOneInOrder(ctx)
 			if err != nil {
 				logrus.Info("Can't find : ", coin)
 			}
 
 			if record == nil {
 				// do buy
-				err = (&inOrder).AddInOrder(db)
+				err = (&inOrder).AddInOrder(ctx)
 				if err != nil {
 					logrus.Errorf("add InOrder error : %v , inOrder is %v:", err, inOrder)
 					continue

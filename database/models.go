@@ -66,7 +66,7 @@ type InOrder struct {
 	Pair      string `gorm:"type:varchar(32)"`
 }
 
-func (inorder InOrder) TableName() string {
+func (inOrder InOrder) TableName() string {
 	return "inorders"
 }
 

@@ -15,10 +15,9 @@ type Trade struct {
 	Policy string
 }
 
-// trade entry point
+// Entry trade entry point
 func (t *Trade) Entry(ctx context.Context) {
 	sysConf := utils.GetSystemConfContext(ctx)
-	db := utils.GetDBContext(ctx)
 
 	var buyCoins = make(chan string, 2)
 	// use all cpus
@@ -38,9 +37,9 @@ func (t *Trade) Entry(ctx context.Context) {
 
 		for i := 0; i < (len(coins)/10 + 1); i++ {
 			if i == len(coins)/10 {
-				go FindTrendTarget(db, sysConf, coins[i*10:i*10+len(coins)%10], buyCoins)
+				go FindTrendTarget(ctx, sysConf, coins[i*10:i*10+len(coins)%10], buyCoins)
 			} else {
-				go FindTrendTarget(db, sysConf, coins[i*10:i*10+9], buyCoins)
+				go FindTrendTarget(ctx, sysConf, coins[i*10:i*10+9], buyCoins)
 			}
 		}
 
@@ -52,17 +51,17 @@ func (t *Trade) Entry(ctx context.Context) {
 					Contract:  coin,
 					Direction: "up",
 				}
-				c, err := order.FetchOneOrder(db)
+				c, err := order.FetchOneOrder(ctx)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(db, sysConf, coin, "up", "trend")
+					go DoTrade(ctx, sysConf, coin, "up", "trend")
 				}
 			}
 		}
 
 	} else if t.Policy == utils.Coint {
 		var buyCoins = make(chan string, 2)
-		go DoCointegration(db, sysConf, buyCoins)
+		go DoCointegration(ctx, sysConf, buyCoins)
 
 		for {
 			select {
@@ -72,16 +71,16 @@ func (t *Trade) Entry(ctx context.Context) {
 					Contract:  coin,
 					Direction: "up",
 				}
-				c, err := order.FetchOneOrder(db)
+				c, err := order.FetchOneOrder(ctx)
 				if c == nil && err != nil {
 					// buy it.
-					go DoTrade(db, sysConf, coin, "up", "cointegration")
+					go DoTrade(ctx, sysConf, coin, "up", "cointegration")
 				}
 			}
 		}
 	} else if t.Policy == utils.Trend30Min {
 		var buyCoins = make(chan map[string]string, 2)
-		go FindTrend30MTarget(db, sysConf, buyCoins)
+		go FindTrend30MTarget(ctx, sysConf, buyCoins)
 
 		for {
 			select {
@@ -92,10 +91,10 @@ func (t *Trade) Entry(ctx context.Context) {
 						Contract:  cn,
 						Direction: direction,
 					}
-					c, err := order.FetchOneOrder(db)
+					c, err := order.FetchOneOrder(ctx)
 					if c == nil && err != nil {
 						// buy it.
-						go DoTrade(db, sysConf, cn, direction, "trend30m")
+						go DoTrade(ctx, sysConf, cn, direction, "trend30m")
 					}
 				}
 			}

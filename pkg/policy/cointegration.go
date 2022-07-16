@@ -1,14 +1,12 @@
 package policy
 
 import (
+	"context"
 	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-
 	"github.com/ytwxy99/autocoins/database"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
@@ -16,22 +14,21 @@ import (
 
 type Cointegration struct{}
 
-// cointegration policy
+// Target cointegration policy
 func (Cointegration) Target(args ...interface{}) interface{} {
-	db := args[0].(*gorm.DB)
-	sysConf := args[1].(*configuration.SystemConf)
+	ctx := args[0].(context.Context)
 
 	buyCoins := []string{}
 	sortCoins := map[string]float32{}
 	conditions := map[string]bool{}
 
 	// fetch all weight coins for judging btc
-	weights, err := utils.ReadLines(sysConf.WeightCsv)
+	weights, err := utils.ReadLines(utils.GetSystemConfContext(ctx).WeightCsv)
 	if err != nil {
 		logrus.Error("read weight csv failed, err is ", err)
 	}
 
-	coints, err := database.GetAllCoint(db)
+	coints, err := database.GetAllCoint(ctx)
 	if err != nil || len(coints) == 0 {
 		logrus.Error("get cointegration from database error: ", err)
 	}
@@ -129,13 +126,13 @@ func (Cointegration) Target(args ...interface{}) interface{} {
 	}
 
 	if float32(countUp)/float32(allUp) > 0.7 && btcRisingCondition && priceRisingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexCoin, db, "up") {
+		if tradeJugde(ctx, utils.IndexCoin, "up") {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
 
 	if float32(countDown)/float32(allDown) > 0.7 && btcFallingCondition && priceFallingCondition && averageDiff(utils.IndexCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexCoin, db, "up") {
+		if tradeJugde(ctx, utils.IndexCoin, "up") {
 			buyCoins = append(buyCoins, utils.IndexCoin)
 		}
 	}
@@ -178,13 +175,13 @@ func conditionDownMonitor(coin string, averageDiff float64) bool {
 }
 
 // to judge this coin can be traded or not
-func tradeJugde(coin string, db *gorm.DB, direction string) bool {
+func tradeJugde(ctx context.Context, coin string, direction string) bool {
 	inOrder := database.InOrder{
 		Contract:  coin,
 		Direction: direction,
 	}
 
-	record, err := inOrder.FetchOneInOrder(db)
+	record, err := inOrder.FetchOneInOrder(ctx)
 	if err != nil && record == nil {
 		return true
 	} else {

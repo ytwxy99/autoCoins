@@ -1,19 +1,21 @@
 package database
 
 import (
+	"context"
 	"errors"
-	"gorm.io/gorm"
+
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
-// add one order
-func (inOrder *InOrder) AddInOrder(db *gorm.DB) error {
-	tx := db.Create(inOrder)
+// AddInOrder add one order
+func (inOrder *InOrder) AddInOrder(ctx context.Context) error {
+	tx := utils.GetDBContext(ctx).Create(inOrder)
 	return tx.Error
 }
 
-// fetch one order by contract and ditection
-func (inOrder InOrder) FetchOneInOrder(db *gorm.DB) (*InOrder, error) {
-	db.Table("inOrder").
+// FetchOneInOrder fetch one order by contract and ditection
+func (inOrder InOrder) FetchOneInOrder(ctx context.Context) (*InOrder, error) {
+	utils.GetDBContext(ctx).Table("inOrder").
 		Where("contract = ? AND direction = ?", inOrder.Contract, inOrder.Direction).First(&inOrder)
 
 	if inOrder.ID == 0 {
@@ -23,14 +25,14 @@ func (inOrder InOrder) FetchOneInOrder(db *gorm.DB) (*InOrder, error) {
 	return &inOrder, nil
 }
 
-// update order
-func (inOrder *InOrder) UpdateInOrder(db *gorm.DB) error {
-	tx := db.Model(&InOrder{}).Where("price > ?", 10).Updates(inOrder)
+// UpdateInOrder update order
+func (inOrder *InOrder) UpdateInOrder(ctx context.Context) error {
+	tx := utils.GetDBContext(ctx).Model(&InOrder{}).Where("price > ?", 10).Updates(inOrder)
 	return tx.Error
 }
 
-// delete order
-func (inOrder *InOrder) DeleteInOrder(db *gorm.DB) error {
-	tx := db.Where("contract = ? and direction = ?", inOrder.Contract, inOrder.Contract).Delete(inOrder)
+// DeleteInOrder delete order
+func (inOrder *InOrder) DeleteInOrder(ctx context.Context) error {
+	tx := utils.GetDBContext(ctx).Where("contract = ? and direction = ?", inOrder.Contract, inOrder.Contract).Delete(inOrder)
 	return tx.Error
 }

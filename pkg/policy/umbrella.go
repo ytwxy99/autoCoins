@@ -1,11 +1,11 @@
 package policy
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 
 	"github.com/ytwxy99/autocoins/database"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
@@ -14,19 +14,18 @@ import (
 type Umbrella struct{}
 
 func (*Umbrella) Target(args ...interface{}) interface{} {
-	db := args[0].(*gorm.DB)
-	sysConf := args[1].(*configuration.SystemConf)
+	ctx := args[0].(context.Context)
 
 	buyCoins := []string{}
 	conditions := map[string]bool{}
 
 	//fetch all weight coins for judging bnb
-	weights, err := utils.ReadLines(sysConf.Platform)
+	weights, err := utils.ReadLines(utils.GetSystemConfContext(ctx).Platform)
 	if err != nil {
 		logrus.Error("read platform csv failed, err is ", err)
 	}
 
-	coints, err := database.GetAllCoint(db)
+	coints, err := database.GetAllCoint(ctx)
 	if err != nil || len(coints) == 0 {
 		logrus.Error("get cointegration from database error: ", err)
 	}
@@ -98,13 +97,13 @@ func (*Umbrella) Target(args ...interface{}) interface{} {
 	}
 
 	if float32(countUp)/float32(allUp) > 0.95 && btcRisingCondition && priceRisingCondition && averageDiff(utils.IndexPlatformCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexPlatformCoin, db, "up") {
+		if tradeJugde(ctx, utils.IndexPlatformCoin, "up") {
 			buyCoins = append(buyCoins, utils.IndexPlatformCoin)
 		}
 	}
 
 	if float32(countDown)/float32(allDown) > 0.95 && btcFallingCondition && priceFallingCondition && averageDiff(utils.IndexPlatformCoin, utils.Level4Hour) {
-		if tradeJugde(utils.IndexPlatformCoin, db, "up") {
+		if tradeJugde(ctx, utils.IndexPlatformCoin, "up") {
 			buyCoins = append(buyCoins, utils.IndexPlatformCoin)
 		}
 	}

@@ -1,13 +1,15 @@
 package database
 
 import (
-	"gorm.io/gorm"
+	"context"
+
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
-// get all cointegrations or spicified limit
-func GetAllCoint(db *gorm.DB) ([]Cointegration, error) {
+// GetAllCoint get all cointegrations or spicified limit
+func GetAllCoint(ctx context.Context) ([]Cointegration, error) {
 	var coints []Cointegration
-	tx := db.Find(&coints)
+	tx := utils.GetDBContext(ctx).Find(&coints)
 
 	return coints, tx.Error
 }

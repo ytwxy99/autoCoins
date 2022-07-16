@@ -1,19 +1,21 @@
 package database
 
 import (
+	"context"
 	"errors"
-	"gorm.io/gorm"
+
+	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
-// add one sold
-func (sold *Sold) AddSold(db *gorm.DB) error {
-	tx := db.Create(sold)
+// AddSold add one sold
+func (sold *Sold) AddSold(ctx context.Context) error {
+	tx := utils.GetDBContext(ctx).Create(sold)
 	return tx.Error
 }
 
-// fetch one sold by contract and ditection
-func (sold Sold) FetchOneSold(db *gorm.DB) (*Sold, error) {
-	db.Table("sold").
+// FetchOneSold fetch one sold by contract and ditection
+func (sold Sold) FetchOneSold(ctx context.Context) (*Sold, error) {
+	utils.GetDBContext(ctx).Table("sold").
 		Where("contract = ?", sold.Contract).First(&sold)
 
 	if sold.ID == 0 {
@@ -22,9 +24,9 @@ func (sold Sold) FetchOneSold(db *gorm.DB) (*Sold, error) {
 	return &sold, nil
 }
 
-// get all sold
-func GetAllSold(db *gorm.DB) ([]Sold, error) {
+// GetAllSold get all sold
+func GetAllSold(ctx context.Context) ([]Sold, error) {
 	var solds []Sold
-	tx := db.Find(&solds)
+	tx := utils.GetDBContext(ctx).Find(&solds)
 	return solds, tx.Error
 }
