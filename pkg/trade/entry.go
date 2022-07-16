@@ -1,15 +1,13 @@
 package trade
 
 import (
+	"context"
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
 
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-
 	"github.com/ytwxy99/autocoins/database"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
@@ -18,7 +16,10 @@ type Trade struct {
 }
 
 // trade entry point
-func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
+func (t *Trade) Entry(ctx context.Context) {
+	sysConf := utils.GetSystemConfContext(ctx)
+	db := utils.GetDBContext(ctx)
+
 	var buyCoins = make(chan string, 2)
 	// use all cpus
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -28,7 +29,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 		http.ListenAndServe("localhost:6060", nil)
 	}()
 
-	if t.Policy == "trend" {
+	if t.Policy == utils.Trend {
 		coins, err := utils.ReadLines(sysConf.TrendCsv)
 		if err != nil {
 			logrus.Error("Read local file error: %v", err)
@@ -59,7 +60,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 			}
 		}
 
-	} else if t.Policy == "cointegration" {
+	} else if t.Policy == utils.Coint {
 		var buyCoins = make(chan string, 2)
 		go DoCointegration(db, sysConf, buyCoins)
 
@@ -78,10 +79,7 @@ func (t *Trade) Entry(db *gorm.DB, sysConf *configuration.SystemConf) {
 				}
 			}
 		}
-	} else if t.Policy == "umbrella" {
-		var buyCoins = make(chan string, 2)
-		DoUmbrella(db, sysConf, buyCoins)
-	} else if t.Policy == "trend30m" {
+	} else if t.Policy == utils.Trend30Min {
 		var buyCoins = make(chan map[string]string, 2)
 		go FindTrend30MTarget(db, sysConf, buyCoins)
 

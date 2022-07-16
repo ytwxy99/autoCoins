@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"github.com/ytwxy99/autocoins/pkg/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -74,7 +75,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Start autoCoins gateway",
 		Run: func(cmd *cobra.Command, args []string) {
 			router := gin.Default()
-			gateway.Router(client.Client, router, sysConf, db)
+			gateway.Router(ctx, router)
 		},
 	}
 
@@ -93,9 +94,9 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 
 			for {
 				t := &trade.Trade{
-					Policy: "trend",
+					Policy: utils.Trend,
 				}
-				t.Entry(db, sysConf)
+				t.Entry(ctx)
 			}
 		},
 	}
@@ -107,22 +108,9 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("Find the cointegration in the sea ！ get it !")
 			t := &trade.Trade{
-				Policy: "cointegration",
+				Policy: utils.Coint,
 			}
-			t.Entry(db, sysConf)
-		},
-	}
-
-	// use cointegration policy
-	var umbrellaCmd = &cobra.Command{
-		Use:   "umbrella [string to echo]",
-		Short: "Using umbrella to do a trade",
-		Run: func(cmd *cobra.Command, args []string) {
-			logrus.Info("Find the umbrella in the sea ！ get it !")
-			t := &trade.Trade{
-				Policy: "umbrella",
-			}
-			t.Entry(db, sysConf)
+			t.Entry(ctx)
 		},
 	}
 
@@ -133,9 +121,9 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
 			t := &trade.Trade{
-				Policy: "trend30m",
+				Policy: utils.Trend30Min,
 			}
-			t.Entry(db, sysConf)
+			t.Entry(ctx)
 		},
 	}
 
@@ -145,7 +133,6 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	rootCmd.AddCommand(tradeCmd)
 	tradeCmd.AddCommand(trendCmd)
 	tradeCmd.AddCommand(cointegrationCmd)
-	tradeCmd.AddCommand(umbrellaCmd)
 	tradeCmd.AddCommand(trend30mCmd)
 	rootCmd.Execute()
 }

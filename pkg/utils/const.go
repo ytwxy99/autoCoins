@@ -29,4 +29,9 @@ const (
 	DirectionUp       = "up"
 	DirectionDown     = "down"
 	ClearOrder        = "清仓退出"
+
+	// Policy define
+	Trend      = "trend"
+	Trend30Min = "trend30m"
+	Coint      = "cointegration"
 )
