@@ -2,6 +2,7 @@ package trade
 
 import (
 	"context"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/ytwxy99/autocoins/database"
