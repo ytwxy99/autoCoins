@@ -30,7 +30,7 @@ func (Trend30M) Target(ctx context.Context) interface{} {
 
 	// rising market buy point
 	if risingCondition {
-		if tradeJugde(ctx, coin, "up") {
+		if tradeJugde(ctx, coin, "up") && utils.IsTradeTime() {
 			isBuy[coin] = utils.DirectionUp
 			return isBuy
 		}
@@ -39,7 +39,7 @@ func (Trend30M) Target(ctx context.Context) interface{} {
 
 	// falling market buy point
 	if fallingCondition {
-		if tradeJugde(ctx, coin, "down") {
+		if tradeJugde(ctx, coin, "down") && utils.IsTradeTime() {
 			isBuy[coin] = utils.DirectionDown
 			return isBuy
 		}
@@ -54,11 +54,14 @@ func conditionUpMonitor30M(coin string, averageDiff float64, currentPrice float6
 		Level:        utils.Level30Min,
 		MA:           utils.MA21,
 	}
+	// the 21th average line is rising
 	MA21Average := averageArgs.Average(false) > averageArgs.Average(true)
 
+	// the 5th average line is rising
 	averageArgs.MA = utils.MA5
 	MA5Average := averageArgs.Average(false) > averageArgs.Average(true)*averageDiff
 
+	// the pricing is rising and larger than 21th average line
 	priceC := currentPrice > averageArgs.Average(false)
 
 	return MA21Average && MA5Average && priceC

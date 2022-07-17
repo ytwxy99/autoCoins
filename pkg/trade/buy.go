@@ -160,7 +160,7 @@ func FindTrend30MTarget(ctx context.Context, buyCoins chan<- map[string]string) 
 				continue
 			}
 
-			//NOTE(ytwxy99), do real trade.
+			// do real trade.
 			inOrder := database.InOrder{
 				Contract:  coin,
 				Direction: target[coin],
