@@ -15,7 +15,7 @@ func (inOrder *InOrder) AddInOrder(ctx context.Context) error {
 
 // FetchOneInOrder fetch one order by contract and ditection
 func (inOrder InOrder) FetchOneInOrder(ctx context.Context) (*InOrder, error) {
-	utils.GetDBContext(ctx).Table("inOrder").
+	utils.GetDBContext(ctx).Table("inorders").
 		Where("contract = ? AND direction = ?", inOrder.Contract, inOrder.Direction).First(&inOrder)
 
 	if inOrder.ID == 0 {
