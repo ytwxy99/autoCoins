@@ -189,27 +189,6 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 
 			if r1 || r2 || r3 || r4 {
 				// do sell
-				if order != nil {
-					sold := &database.Sold{
-						Contract:        sellArgs.Contract,
-						Price:           utils.Float32ToString(float32(currentPrice)),
-						Volume:          0,
-						Time:            utils.GetNowTimeStamp(),
-						Profit:          float32(currentPrice) - utils.StringToFloat32(order.Price),
-						Relative_profit: utils.Float32ToString((float32(currentPrice) - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100),
-						Test:            "test-order",
-						Status:          "close",
-						Typee:           "limit",
-						Account:         "spot",
-						Side:            "sell",
-						Iceberg:         "0",
-					}
-					if err := sold.AddSold(ctx); err != nil {
-						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
-						return false
-					}
-				}
-
 				return true
 			}
 		} else if sellArgs.OrderDirection == utils.DirectionDown {
@@ -224,27 +203,6 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 
 			if f1 || f2 || f3 || f4 {
 				// do sell
-				if order != nil {
-					sold := &database.Sold{
-						Contract:        sellArgs.Contract,
-						Price:           utils.Float32ToString(float32(currentPrice)),
-						Volume:          0,
-						Time:            utils.GetNowTimeStamp(),
-						Profit:          float32(currentPrice) - utils.StringToFloat32(order.Price),
-						Relative_profit: utils.Float32ToString((float32(currentPrice) - utils.StringToFloat32(order.Price)) / utils.StringToFloat32(order.Price) * 100),
-						Test:            "test-order",
-						Status:          "close",
-						Typee:           "limit",
-						Account:         "spot",
-						Side:            "sell",
-						Iceberg:         "0",
-					}
-					if err := sold.AddSold(ctx); err != nil {
-						logrus.Errorf("Craete sold failed, the sold detail is %s, the error is %s.", sold, err)
-						return false
-					}
-				}
-
 				return true
 			}
 		}

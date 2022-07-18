@@ -142,8 +142,13 @@ func DoTrade(ctx context.Context, coin string, direction string, policy string) 
 					soldCoins.Symbol = coin
 					soldCoins.Volume = volume
 					soldCoins.Time = utils.GetNowTimeStamp()
-					soldCoins.Profit = lastPrice - storedPrice
-					soldCoins.Relative_profit = utils.Float32ToString((lastPrice - storedPrice) / storedPrice * 100)
+					if direction == utils.DirectionUp {
+						soldCoins.Profit = lastPrice - storedPrice
+						soldCoins.Relative_profit = utils.Float32ToString((lastPrice - storedPrice) / storedPrice * 100)
+					} else {
+						soldCoins.Profit = storedPrice - lastPrice
+						soldCoins.Relative_profit = utils.Float32ToString((storedPrice - lastPrice) / storedPrice * 100)
+					}
 					soldCoins.Test = "test-order"
 					soldCoins.Status = "close"
 					soldCoins.Typee = "limit"
