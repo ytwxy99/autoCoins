@@ -33,7 +33,7 @@ func (inOrder *InOrder) UpdateInOrder(ctx context.Context) error {
 
 // DeleteInOrder delete order
 func (inOrder *InOrder) DeleteInOrder(ctx context.Context) error {
-	tx := utils.GetDBContext(ctx).Table("inorders").
-		Where("contract = ? and direction = ?", inOrder.Contract, inOrder.Contract).Delete(inOrder)
+	tx := utils.GetDBContext(ctx).Model(&InOrder{}).
+		Where("contract = ? and direction = ?", inOrder.Contract, inOrder.Direction).Delete(inOrder)
 	return tx.Error
 }
