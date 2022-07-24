@@ -22,10 +22,10 @@ type SellArgs struct {
 }
 
 func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
-	if sellArgs.Policy == "trend" {
+	if sellArgs.Policy == utils.Trend {
 		// sell specify coin when the absolute value of rising or falling rate over 15%.
 		return math.Abs(float64((sellArgs.LastPrice-sellArgs.StoredPrice)/sellArgs.StoredPrice)) >= 15
-	} else if sellArgs.Policy == "cointegration" {
+	} else if sellArgs.Policy == utils.Coint {
 		weightResult := map[string]bool{}
 		order, err := (database.Order{
 			Contract:  sellArgs.Contract,
@@ -151,7 +151,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 			}
 			return false
 		}
-	} else if sellArgs.Policy == "trend30m" {
+	} else if sellArgs.Policy == utils.Trend30Min {
 		average := &index.Average{
 			CurrencyPair: sellArgs.Contract,
 			Level:        utils.Level30Min,
@@ -187,7 +187,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 			average.MA = utils.MA5
 			r4 := average.Average(false) <= average.Average(true)
 
-			if r1 || r2 || r3 || r4 {
+			if (r1 && r4) || r2 || r3 {
 				// do sell
 				return true
 			}
@@ -201,7 +201,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 			average.MA = utils.MA5
 			f4 := average.Average(false) >= average.Average(true)
 
-			if f1 || f2 || f3 || f4 {
+			if (f1 && f4) || f2 || f3 {
 				// do sell
 				return true
 			}
