@@ -2,8 +2,6 @@ package trade
 
 import (
 	"context"
-	"math"
-
 	"github.com/sirupsen/logrus"
 	"github.com/ytwxy99/autocoins/database"
 	"github.com/ytwxy99/autocoins/pkg/configuration"
@@ -23,8 +21,20 @@ type SellArgs struct {
 
 func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 	if sellArgs.Policy == utils.Trend {
-		// sell specify coin when the absolute value of rising or falling rate over 15%.
-		return math.Abs(float64((sellArgs.LastPrice-sellArgs.StoredPrice)/sellArgs.StoredPrice)) >= 15
+
+		averageArgs := &index.Average{
+			CurrencyPair: sellArgs.Contract,
+			Level:        utils.Level4Hour,
+			MA:           utils.MA21,
+		}
+
+		condition := averageArgs.Average(false) > averageArgs.Average(true)
+		if sellArgs.OrderDirection == utils.DirectionUp {
+			return !condition
+		} else {
+			return condition
+		}
+
 	} else if sellArgs.Policy == utils.Coint {
 		weightResult := map[string]bool{}
 		order, err := (database.Order{
@@ -187,7 +197,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 			average.MA = utils.MA5
 			r4 := average.Average(false) <= average.Average(true)
 
-			if (r1 && r4) || r2 || r3 {
+			if r1 || r2 || r3 || r4 {
 				// do sell
 				return true
 			}
@@ -201,7 +211,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 			average.MA = utils.MA5
 			f4 := average.Average(false) >= average.Average(true)
 
-			if (f1 && f4) || f2 || f3 {
+			if f1 || f2 || f3 || f4 {
 				// do sell
 				return true
 			}
