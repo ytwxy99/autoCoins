@@ -113,5 +113,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	tradeCmd.AddCommand(trend30mCmd)
 	rootCmd.Execute()
 
-	tradeAction.PolicyEntry(ctx)
+	if tradeAction != nil {
+		tradeAction.PolicyEntry(ctx)
+	}
 }
