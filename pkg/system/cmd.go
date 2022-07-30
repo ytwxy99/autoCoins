@@ -2,7 +2,6 @@ package system
 
 import (
 	"context"
-	"github.com/ytwxy99/autocoins/pkg/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,9 +15,10 @@ import (
 	"github.com/ytwxy99/autocoins/pkg/trade"
 )
 
-// refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
+//InitCmd refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
 func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB) {
-	// init action
+	var tradeAction trade.Entry
+
 	var InitCmd = &cobra.Command{
 		Use:   "init [string to echo]",
 		Short: "Init trade environment",
@@ -91,26 +91,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Using trend to do a trade",
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
-
-			for {
-				t := &trade.Trade{
-					Policy: utils.Trend,
-				}
-				t.Entry(ctx)
-			}
-		},
-	}
-
-	// use cointegration policy
-	var cointegrationCmd = &cobra.Command{
-		Use:   "cointegration [string to echo]",
-		Short: "Using cointegration to do a trade",
-		Run: func(cmd *cobra.Command, args []string) {
-			logrus.Info("Find the cointegration in the sea ！ get it !")
-			t := &trade.Trade{
-				Policy: utils.Coint,
-			}
-			t.Entry(ctx)
+			tradeAction = &trade.Trend{}
 		},
 	}
 
@@ -120,10 +101,7 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 		Short: "Using trend to do a trade",
 		Run: func(cmd *cobra.Command, args []string) {
 			logrus.Info("market quotations is comming ！ get it !")
-			t := &trade.Trade{
-				Policy: utils.Trend30Min,
-			}
-			t.Entry(ctx)
+			tradeAction = &trade.Trend30M{}
 		},
 	}
 
@@ -132,7 +110,8 @@ func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB
 	rootCmd.AddCommand(GateWayCmd)
 	rootCmd.AddCommand(tradeCmd)
 	tradeCmd.AddCommand(trendCmd)
-	tradeCmd.AddCommand(cointegrationCmd)
 	tradeCmd.AddCommand(trend30mCmd)
 	rootCmd.Execute()
+
+	tradeAction.PolicyEntry(ctx)
 }

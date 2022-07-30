@@ -1,6 +1,7 @@
 package index
 
 import (
+	"github.com/ytwxy99/autocoins/pkg/interfaces"
 	"github.com/ytwxy99/autocoins/pkg/utils"
 )
 
@@ -10,8 +11,11 @@ type MacdArgs struct {
 	M     int
 }
 
-func (macdArgs *MacdArgs) GetMacd(values [][]string) []map[string]string {
+func GetMacd(contract string, level string) []map[string]string {
 	var ks []map[string]string
+	macdArgs := defaultMacdArgs()
+
+	values := getMacdValues(contract, level)
 	for _, value := range values {
 		m := make(map[string]string)
 		m["t"] = value[0] // time
@@ -72,7 +76,14 @@ func calcEma(values []map[string]string, num int) []float32 {
 	return emaAll
 }
 
-func DefaultMacdArgs() *MacdArgs {
+func getMacdValues(contract string, level string) [][]string {
+	return (&interfaces.MarketArgs{
+		CurrencyPair: contract,
+		Level:        level,
+	}).SpotMarket()
+}
+
+func defaultMacdArgs() *MacdArgs {
 	return &MacdArgs{
 		Short: 12,
 		Long:  26,

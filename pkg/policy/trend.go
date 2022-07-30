@@ -7,65 +7,109 @@ import (
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
 )
 
-type MacdPolicy struct{}
-type condition struct {
-	coin        string
-	dataMacd15M []map[string]string
-	dataMacd4H  []map[string]string
+type TrendPolicy struct {
 }
 
 // Target find macd buy point
-func (*MacdPolicy) Target(ctx context.Context) interface{} {
+func (*TrendPolicy) Target(ctx context.Context) map[string]string {
+	isBuy := make(map[string]string)
 	coin := ctx.Value("coin").(string)
 
-	market4H := (&interfaces.MarketArgs{
+	sports := (&interfaces.MarketArgs{
 		CurrencyPair: coin,
-		Interval:     -100,
-		Level:        utils.Level4Hour,
+		Interval:     utils.Now,
+		Level:        utils.Level30Min,
 	}).SpotMarket()
-	market15M := (&interfaces.MarketArgs{
-		CurrencyPair: coin,
-		Interval:     -1,
-		Level:        utils.Level15Min,
-	}).SpotMarket()
-
-	if market4H != nil && market15M != nil {
-		macdArgs := index.DefaultMacdArgs()
-		c := &condition{
-			coin:        coin,
-			dataMacd15M: macdArgs.GetMacd(market15M),
-			dataMacd4H:  macdArgs.GetMacd(market4H),
-		}
-
-		if len(c.dataMacd4H) < 5 || len(c.dataMacd15M) < 5 {
-			return false
-		}
-
-		return c.buyCondition()
+	if sports == nil {
+		return isBuy
 	}
 
-	return false
+	//currentPrice := utils.StringToFloat64(sports[0][2])
+	if trendRising(coin) {
+		// for rising market
+		isBuy[coin] = utils.DirectionUp
+	}
+
+	if trendfalling(coin) {
+		// for falling market
+		isBuy[coin] = utils.DirectionDown
+	}
+
+	return isBuy
 }
 
-func (c *condition) buyCondition() bool {
-	// judgment depends on 4h price
-	conditionA := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-1][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-1][utils.Open], 0, 0)    //当下4h是具有涨幅的
-	conditionB := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-2][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], 0, 1.1) //上个4h是涨幅十个点以上的
-	conditionC := utils.Compare(c.dataMacd4H[len(c.dataMacd4H)-3][utils.Close], c.dataMacd4H[len(c.dataMacd4H)-4][utils.Close], 0, 1.05)
+func trendRising(coin string) bool {
+	// 均线判断
+	averageArgs := &index.Average{
+		CurrencyPair: coin,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
+	}
+	MA21 := averageArgs.Average(false) > averageArgs.Average(true)
+	averageArgs.MA = utils.MA10
+	MA10 := averageArgs.Average(false) > averageArgs.Average(true)
+	averageArgs.MA = utils.MA5
+	MA5 := averageArgs.Average(false) > averageArgs.Average(true)
+
+	// macd判断
+	if MA21 && MA10 && MA5 && conditionRising(coin) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func trendfalling(coin string) bool {
+	// 均线判断
+	averageArgs := &index.Average{
+		CurrencyPair: coin,
+		Level:        utils.Level4Hour,
+		MA:           utils.MA21,
+	}
+	MA21 := averageArgs.Average(false) < averageArgs.Average(true)
+	averageArgs.MA = utils.MA10
+	MA10 := averageArgs.Average(false) < averageArgs.Average(true)
+	averageArgs.MA = utils.MA5
+	MA5 := averageArgs.Average(false) < averageArgs.Average(true)
+
+	// macd判断
+	if MA21 && MA10 && MA5 && conditionFalling(coin) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func conditionRising(contract string) bool {
+
+	dataMacd4h := index.GetMacd(contract, utils.Level4Hour)
+	dataMacd15m := index.GetMacd(contract, utils.Level4Hour)
+	if len(dataMacd4h) < 5 || len(dataMacd15m) < 5 {
+		return false
+	}
 
 	// judgment depends on 4h macd
-	conditionD := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-1]["macd"]) > 0                                          //当下4h的macd大于0
-	conditionE := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-2]["macd"]) > 0                                          //上个4h的macd大于0
-	conditionF := utils.StringToFloat32(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"]) > 0                                        //当下15m的macd大于0
-	conditionG := utils.Compare(c.dataMacd15M[len(c.dataMacd15M)-1]["macd"], c.dataMacd15M[len(c.dataMacd15M)-2]["macd"], 0, 0) //15m的macd是增长的
+	a := utils.StringToFloat32(dataMacd4h[len(dataMacd4h)-1]["macd"]) > 0 //当下4h的macd大于0
+	//conditionE := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-2]["macd"]) > 0   //上个4h的macd大于0
+	b := utils.StringToFloat32(dataMacd15m[len(dataMacd15m)-1]["macd"]) > 0                                    //当下15m的macd大于0
+	c := utils.Compare(dataMacd15m[len(dataMacd15m)-1]["macd"], dataMacd15m[len(dataMacd15m)-2]["macd"], 0, 0) //15m的macd是增长的
 
-	// judgment depends on price average data
-	averageArgs := index.Average{
-		CurrencyPair: c.coin,
-		Level:        utils.Level4Hour,
-		MA:           utils.Five,
+	return a && b && c
+}
+
+func conditionFalling(contract string) bool {
+
+	dataMacd4h := index.GetMacd(contract, utils.Level4Hour)
+	dataMacd15m := index.GetMacd(contract, utils.Level4Hour)
+	if len(dataMacd4h) < 5 || len(dataMacd15m) < 5 {
+		return false
 	}
-	conditionH := averageArgs.Average(false) > averageArgs.Average(true) //4h的FiveAverage是增长的
 
-	return conditionA && conditionB && !conditionC && conditionD && conditionE && conditionF && conditionG && conditionH
+	// judgment depends on 4h macd
+	a := utils.StringToFloat32(dataMacd4h[len(dataMacd4h)-1]["macd"]) < 0 //当下4h的macd小于0
+	//conditionE := utils.StringToFloat32(c.dataMacd4H[len(c.dataMacd4H)-2]["macd"]) < 0   //上个4h的macd小于0
+	b := utils.StringToFloat32(dataMacd15m[len(dataMacd15m)-1]["macd"]) < 0                                    //当下15m的macd小于0
+	c := utils.Compare(dataMacd15m[len(dataMacd15m)-1]["macd"], dataMacd15m[len(dataMacd15m)-2]["macd"], 0, 0) //15m的macd是增长的
+
+	return a && b && !c
 }

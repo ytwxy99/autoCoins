@@ -8,7 +8,8 @@ import (
 	"github.com/ytwxy99/autocoins/pkg/utils/index"
 )
 
-type Trend30M struct{}
+type Trend30M struct {
+}
 
 // Target cointegration policy
 func (Trend30M) Target(ctx context.Context) interface{} {

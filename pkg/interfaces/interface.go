@@ -21,6 +21,14 @@ type Future struct {
 }
 
 func (marketArgs *MarketArgs) SpotMarket() [][]string {
+	if marketArgs.Level == utils.Level4Hour {
+		marketArgs.Interval = -100
+	} else if marketArgs.Level == utils.Level30Min {
+		marketArgs.Interval = -1
+	} else {
+		return nil
+	}
+
 	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
 	values := client.GetSpotCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
@@ -38,6 +46,14 @@ func (marketArgs *MarketArgs) SpotMarket() [][]string {
 }
 
 func (marketArgs *MarketArgs) FutureMarket() []gateapi.FuturesCandlestick {
+	if marketArgs.Level == utils.Level4Hour {
+		marketArgs.Interval = -100
+	} else if marketArgs.Level == utils.Level30Min {
+		marketArgs.Interval = -1
+	} else {
+		return nil
+	}
+
 	from := utils.GetOldTimeStamp(0, 0, marketArgs.Interval)
 	to := utils.GetNowTimeStamp()
 	futures := client.GetFutureCandlesticks(marketArgs.CurrencyPair, from, to, marketArgs.Level)
