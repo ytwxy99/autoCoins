@@ -25,7 +25,7 @@ func (sellArgs *SellArgs) SellPolicy(ctx context.Context) bool {
 		averageArgs := &index.Average{
 			CurrencyPair: sellArgs.Contract,
 			Level:        utils.Level4Hour,
-			MA:           utils.MA21,
+			MA:           utils.MA10,
 		}
 
 		condition := averageArgs.Average(false) > averageArgs.Average(true)

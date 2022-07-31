@@ -73,14 +73,25 @@ func DoTrade(ctx context.Context, coin string, direction string, policy string) 
 				continue
 			}
 
-			logrus.WithFields(logrus.Fields{
-				"coin":      orderCoins.Contract,
-				"priceDiff": (lastPrice - storedPrice) / storedPrice * 100,
-				"buyPrice":  order.Price,
-				"lastPrice": lastPrice,
-				"topStop":   storedPrice + storedPrice*order.Tp/100,
-				"lowStop":   storedPrice + storedPrice*order.Sl/100,
-			}).Info("the monitor of get_last_price existing coin, ")
+			if direction == utils.DirectionUp {
+				logrus.WithFields(logrus.Fields{
+					"coin":      orderCoins.Contract,
+					"priceDiff": (lastPrice - storedPrice) / storedPrice * 100,
+					"buyPrice":  order.Price,
+					"lastPrice": lastPrice,
+					"topStop":   storedPrice + storedPrice*order.Tp/100,
+					"lowStop":   storedPrice + storedPrice*order.Sl/100,
+				}).Info("the monitor of get_last_price existing coin, ")
+			} else {
+				logrus.WithFields(logrus.Fields{
+					"coin":      orderCoins.Contract,
+					"priceDiff": (storedPrice - lastPrice) / storedPrice * 100,
+					"buyPrice":  order.Price,
+					"lastPrice": lastPrice,
+					"topStop":   storedPrice + storedPrice*order.Tp/100,
+					"lowStop":   storedPrice + storedPrice*order.Sl/100,
+				}).Info("the monitor of get_last_price existing coin, ")
+			}
 
 			// sell args stuct
 			sellArgs := &SellArgs{
@@ -171,15 +182,11 @@ func DoTrade(ctx context.Context, coin string, direction string, policy string) 
 					logrus.Errorf("add Sold error : %v , Sold is %v:", err, soldCoins)
 				}
 
-				if policy == "cointegration" {
-					body := utils.Down + coin
-					utils.SendMail(sysConf, utils.ClearOrder, body)
-				} else if policy == "trend30m" {
-					err = utils.SendMail(sysConf, "建议卖出", "关注币种: "+coin+" 方向："+direction)
-					if err != nil {
-						logrus.Error("Send email failed. the err is ", err)
-					}
+				err = utils.SendMail(sysConf, "建议卖出", "关注币种: "+coin+" 方向："+direction)
+				if err != nil {
+					logrus.Error("Send email failed. the err is ", err)
 				}
+
 				break // this trade is over, break 'for{}'
 			}
 
