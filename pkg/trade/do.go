@@ -139,7 +139,11 @@ func DoTrade(ctx context.Context, coin string, direction string, policy string) 
 
 				}
 
-				logrus.Infof("Sold %v with: price is %v; profit is %v% .", order.Contract, lastPrice, (lastPrice-storedPrice)/storedPrice*100)
+				if direction == utils.DirectionUp {
+					logrus.Infof("Sold %v with: price is %v; profit is %v% .", order.Contract, lastPrice, (lastPrice-storedPrice)/storedPrice*100)
+				} else {
+					logrus.Infof("Sold %v with: price is %v; profit is %v% .", order.Contract, lastPrice, (storedPrice-lastPrice)/storedPrice*100)
+				}
 				err = order.DeleteOrder(ctx)
 				if err != nil {
 					logrus.Errorf("delete Order error : %v , Sold is %v:", err, order)
